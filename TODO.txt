@@ -1,0 +1,8 @@
+* switching of test suites
+* reset scores after 0-th round
+* test display of IO exceptions
+* auto-reloading of scores page
+* deactivation of passive users
+* kicking users
+* truncate player log
+
