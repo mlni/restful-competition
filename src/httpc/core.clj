@@ -68,7 +68,7 @@
   (GET "/" [] (index-page))
   (GET "/register" [] (register-page))
   (POST "/register" {params :params} (do-register (params :name) (params :url)))
-  (GET "/player/:id" {params :params} )
+  (GET "/player/:id" {params :params} (player-page (params :id)))
   (route/resources "/")
   (route/not-found "Page not found"))
 
@@ -77,5 +77,7 @@
       handler/site))
 
 (defn -main [& args]
-  (run-jetty (app) {:port 8080 :join? false}))
-;  (test-thread-main))
+  (println "Launching jetty")
+  (run-jetty (app) {:port 8080 :join? false})
+  (println "Launching testrunner")
+  (test-thread-main))
