@@ -1,3 +1,0 @@
-(ns httpc.core
-  (:use [httpc.player])
-  (:gen-class))
