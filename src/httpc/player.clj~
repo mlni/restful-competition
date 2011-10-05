@@ -1,0 +1,2 @@
+(ns httpc.player
+  (:gen-class))
