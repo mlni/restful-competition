@@ -1,0 +1,22 @@
+  /* Override some defaults */
+  html, body {
+    background-color: #fff;
+  }
+  body {
+    padding-top: 50px; /* 40px to make the container go all the way to the bottom of the topbar */
+  }
+  .content {
+    padding: 20px;
+    margin: 0 -20px; /* negative indent the amount of the padding to maintain the grid system */
+  }
+  .content .span10, .content .span4 {
+    min-height: 500px;
+  }
+  .center {
+    text-align: center;
+  }
+  table th {
+    text-align: center;
+    font-weight: bold;
+  }
+
