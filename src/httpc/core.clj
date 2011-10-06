@@ -65,9 +65,12 @@
 
 (defroutes main-routes
   (GET "/" [] (index-page))
+  (GET "/scores" [] (scores-fragment))  
   (GET "/register" [] (register-page))
   (POST "/register" {params :params} (do-register (params :name) (params :url)))
   (GET "/player/:id" {params :params} (player-page (params :id)))
+  (GET "/player/:id/scores" {params :params} (player-scores-fragment (params :id)))
+  
   (GET "/admin" [] (admin-page))
   (POST "/admin/switch" {params :params} (do-switch-suite (params :suite)))
   (POST "/admin/reset" [] (do-reset-scores))

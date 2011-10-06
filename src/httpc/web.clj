@@ -50,6 +50,13 @@
   [:div.alert-message.success
    [:p msg]])
 
+(defn all-scores []
+  (for [p (players-by-score)]
+    [:tr
+     [:td (link-to (str "/player/" (:id p)) (:name p))]
+     [:td (:url p)]
+     [:td (:score p)]]))
+
 (defn index-page []
   (layout
    (heading1 "Scores")
@@ -60,17 +67,25 @@
        [:th "Player name"]
        [:th "Player url"]
        [:th "Points"]]]
-     [:tbody
-      (for [p (players-by-score)]
-	[:tr
-	 [:td (link-to (str "/player/" (:id p)) (:name p))]
-	 [:td (:url p)]
-	 [:td (:score p)]])]
+     [:tbody {:id "scores"}
+      (all-scores)]
      ]
     (javascript-tag
      "$(function() {
-        $('table').tablesorter({ sortList: [[2,1]]  });
+        // $('table').tablesorter({ sortList: [[2,1]]  });
+        setInterval(function() {
+          $.ajax({ url: '/scores',
+                   success: function(data) {
+                     $('#scores').html(data);
+                     // $('table').trigger('update'); 
+                   }});
+        }, 5000);
       });"))))
+
+(defn scores-fragment []
+  (html (all-scores)))
+
+
 
 (defn register-page [& [name url msg]]
   (layout
@@ -111,10 +126,9 @@
 	:fail "/img/warn.png"
 	:timeout "/img/error.png"} status))
 
-(defn player-page [id]
+(defn player-scores [id]
   (let [p (player-by-id id)] ; todo: redirect to root if player not found
-    (layout
-     (heading1 "Team " (:name p))
+    [:div
      [:div.score "Score: "
       [:strong
        (:score p)]]
@@ -122,7 +136,7 @@
      [:table.zebra-striped
       [:tr
        [:th "Time"]
-       [:th "Event"]
+       [:th "Result"]
        [:th "Score"]
        [:th "Message"]]
       (for [evt (:log p)]
@@ -131,7 +145,28 @@
 	 [:td.center [:img {:src (status-icon (:status evt))
 			    :alt (name (:status evt))}]]
 	 [:td.center (:score evt)]
-	 [:td {:width "70%"} (:message evt)]])])))
+	 [:td {:width "70%"} (:message evt)]])]]))
+
+(defn player-page [id]
+  (let [p (player-by-id id)] ; todo: redirect to root if player not found
+    (layout
+     (heading1 "Team " (:name p))
+     [:div#scores
+      (player-scores id)]
+     (javascript-tag
+      (str
+        "$(function() {
+           setInterval(function() {
+             $.ajax({ url: '/player/" id "/scores',
+                      success: function(data) {
+                        $('#scores').html(data);
+                      }});
+           }, 5000);
+         });")))))
+
+(defn player-scores-fragment [id]
+  (html
+   (player-scores id)))
 
 (defn admin-page [& [msg]]
   (layout

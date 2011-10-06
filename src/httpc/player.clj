@@ -1,6 +1,8 @@
 (ns httpc.player
   (:gen-class))
 
+(def *max-log-items* 20)
+
 (def *players* (atom {}))
 
 (defn generate-id []
@@ -8,7 +10,7 @@
     (apply str (map (fn [_] (rand-nth keys)) (range 16)))))
 
 (defn make-player [name url]
-  {:name name :url url :log [] :score 0 :id (generate-id)})
+  {:name name :url url :log '() :score 0 :id (generate-id)})
 
 (defn- all-players []
   (-> *players*
@@ -45,13 +47,12 @@
    :message message
    :score (score status)})
 
-(def *max-log-items* 8)
-
 (defn record-event! [player evt]
   ; todo: add truncation of log
   (dosync
    (swap! *players* update-in [(:id player) :score] + (:score evt))
-   (swap! *players* update-in [(:id player) :log] conj evt)))
+   (swap! *players* update-in [(:id player) :log] #(take *max-log-items*
+							      (conj % evt)))))
 
 (defn record-timeout! [resps]
   (doseq [r resps]
