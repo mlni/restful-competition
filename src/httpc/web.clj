@@ -1,76 +1,171 @@
 (ns httpc.web
   (:require (ring.util [response :as response]))
   (:use [hiccup core page-helpers form-helpers]
-	[httpc player]))
+	[httpc player test]))
 
 
 (defn- non-blank? [s]
   (and (not (nil? s))
        (not= "" (.trim s))))
 
+(defn- looks-like-url? [s]
+  (try
+    (java.net.URL. s)
+    true
+    (catch Exception e
+      false)))
+
 (defn- format-time [ts]
   (.format (java.text.SimpleDateFormat. "HH:mm:ss")
 	   (java.util.Date. ts)))
 
-(defn layout [& body]
+(defn- layout [& body]
   (html5
    [:head
-    [:title "Restful world"]]
+    [:title "Restful world"]
+    (include-css "/style/bootstrap.min.css"
+		 "/style/custom.css")
+    (include-js "/js/jquery.min.js"
+		"/js/jquery.tablesorter.min.js")]
    [:body
-    body]))
+    [:div.topbar
+     [:div.fill
+      [:div.container
+       [:a.brand {:href "/"} "RESTful competition"]
+       [:ul.nav
+	[:li
+	 (link-to "/register" "Register player")]]]]]
+    [:div.container
+     body]]))
+
+(defn- heading1 [& body]
+  [:div.page-header
+   [:h1
+    body]])
+(defn- content [& body]
+  [:div.content
+   body])
+
+(defn message-ok [msg]
+  [:div.alert-message.success
+   [:p msg]])
 
 (defn index-page []
   (layout
-   [:h1 "Hello restful world!"]
-   [:p (link-to "/register" "I want to play!")]
-   [:table.data
-    [:tr
-     [:th "Player name"]
-     [:th "Points"]]
-    (for [p (players-by-score)]
+   (heading1 "Scores")
+   (content
+    [:table.zebra-striped
+     [:thead
       [:tr
-       [:td (link-to (str "/player/" (:id p)) (:name p))]
-       [:td (:score p)]])]))
+       [:th "Player name"]
+       [:th "Player url"]
+       [:th "Points"]]]
+     [:tbody
+      (for [p (players-by-score)]
+	[:tr
+	 [:td (link-to (str "/player/" (:id p)) (:name p))]
+	 [:td (:url p)]
+	 [:td (:score p)]])]
+     ]
+    (javascript-tag
+     "$(function() {
+        $('table').tablesorter({ sortList: [[2,1]]  });
+      });"))))
 
 (defn register-page [& [name url msg]]
   (layout
-   [:h1 "Register"]
-   (if msg
-     [:div.error msg])
-   (form-to [:post "/register"]
-	    (label :name "Team name:")
-	    (text-field :name name)
-	    [:br]
-	    (label :url "Server url:")
-	    (text-field :url url)
-	    [:br]
-	    (submit-button "Register now"))))
+   (heading1 "Register player")
+   (content
+    (when msg
+      [:div.alert-message.error
+       [:p msg]])
+    (form-to [:post "/register"]
+	    [:fieldset
+	     [:div.clearfix
+	      (label :name "Team name:")
+	      [:div.input
+	       (text-field :name name)]]
+	     [:div.clearfix
+	      (label :url "Server url:")
+	      [:div.input
+	       (text-field :url url)]]]
+	    [:div.actions
+	     [:input.btn.primary {:type "submit" :value "Register now"}]]
+	    ))))
 
 (defn do-register [name url]
   (if (and (non-blank? name)
 	   (non-blank? url))
-    (if (not (player-exists? name))
-      (do
-	(add-player! name url)
-	(response/redirect "/"))
-      (register-page name url "Name already exists"))
+    (if (not (looks-like-url? url))
+      (register-page name url "Please fill in a valid url")
+      (if (not (player-exists? name))
+	(do
+	  (add-player! name url)
+	  (response/redirect "/"))
+	(register-page name url "Name already exists")))
     (register-page name url "Please fill in team name and server url")))
+
+(defn- status-icon [status]
+  (get {:ok "/img/ok.png"
+	:error "/img/error.png"
+	:fail "/img/warn.png"
+	:timeout "/img/error.png"} status))
 
 (defn player-page [id]
   (let [p (player-by-id id)] ; todo: redirect to root if player not found
     (layout
-     [:h1 (:name p)
-      [:div.score "Score: " (:score p)]
-      [:h2 "Log"]
-      [:table.data
-       [:tr
-	[:th "Time"]
-	[:th "Event"]
-	[:th "Score"]
-	[:th "Message"]]
-       (for [evt (:log p)]
-	 [:tr
-	  [:td (format-time (:time evt))]
-	  [:td (:status evt)]
-	  [:td (:score evt)]
-	  [:td (:message evt)]])]])))
+     (heading1 "Team " (:name p))
+     [:div.score "Score: "
+      [:strong
+       (:score p)]]
+     [:br]
+     [:table.zebra-striped
+      [:tr
+       [:th "Time"]
+       [:th "Event"]
+       [:th "Score"]
+       [:th "Message"]]
+      (for [evt (:log p)]
+	[:tr
+	 [:td (format-time (:time evt))]
+	 [:td.center [:img {:src (status-icon (:status evt))
+			    :alt (name (:status evt))}]]
+	 [:td.center (:score evt)]
+	 [:td {:width "70%"} (:message evt)]])])))
+
+(defn admin-page [& [msg]]
+  (layout
+   (heading1 "Admin")
+   (when msg
+     (message-ok msg))
+   (form-to [:post "/admin/switch"]
+	    [:fieldset
+	     [:legend "Test suite"]
+	     [:div.clearfix
+	      (label :suite "Active suite:")
+	      [:div.input
+	       [:ul.inputs-list
+		(for [suite *suites*]
+		  [:li
+		   [:label
+		    (radio-button :suite
+			       (= suite (deref *suite*))
+			       (:name suite))
+		    [:span " " (:name suite)]]])]]]]
+	    [:div.actions
+	     [:input {:type "submit" :class "btn primary" :value "Select"}]])
+   (form-to [:post "/admin/reset"]
+	    [:h3 "Reset all scores"]
+	    [:p "Reset all scores to zero in order to start from a new suite."]
+	    [:div.actions
+	     [:input {:type "submit" :class "btn primary" :value "Reset"
+		      :onclick "return confirm('Sure?')"}]])))
+
+(defn do-switch-suite [suite]
+  (when (non-blank? suite)
+    (switch-suite! suite))
+  (admin-page "Suite switched"))
+
+(defn do-reset-scores []
+  (reset-scores!)
+  (response/redirect "/admin"))

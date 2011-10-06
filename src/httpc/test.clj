@@ -20,8 +20,8 @@
     (let [[s msg]
 	  (cond (:error resp) [:error (:error resp)]
 		(not= 200 (:code (:status resp))) [:error "Server did not respond with 200"]
-		(= expected (:content resp)) [:ok "Test passed"]
-		:else [:fail "Test failed"])]
+		(= expected (:content resp)) [:ok "Correct"]
+		:else [:fail "Wrong answer!"])]
       (make-log-event s msg))))
 
 (defn- random-int [min max]
@@ -69,7 +69,8 @@
     (record-event! (:player test) log-entry)))
 
 (defn switch-suite! [s]
-  (reset! *suite* s))
+  (let [suite (first (filter #(= (:name %) s) *suites*))]
+    (reset! *suite* suite)))
 
 (defn- make-suite [name tests]
   {:name name :tests tests})
@@ -78,6 +79,6 @@
   (def *suites* [(make-suite "Trivial" [test-your-name])
 		 (make-suite "Simple" [test-sum-numbers
 				       test-largest-number])])
-  (switch-suite! (second *suites*)))
+  (switch-suite! "Simple"))
 
 (init)

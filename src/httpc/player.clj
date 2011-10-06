@@ -48,7 +48,6 @@
 (def *max-log-items* 8)
 
 (defn record-event! [player evt]
-  (println (:name player) (:status evt))
   ; todo: add truncation of log
   (dosync
    (swap! *players* update-in [(:id player) :score] + (:score evt))
@@ -58,6 +57,11 @@
   (doseq [r resps]
     (record-event! (:player r) (make-log-event :timeout "Request timed out"))))
 
+(defn reset-scores! []
+  (dosync
+   (let [ps (deref *players*)]
+     (reset! *players*
+	    (reduce (fn [r k] (assoc-in r [k :score] 0)) ps (keys ps))))))
 
 (defn- init []
   (reset! *players* {})

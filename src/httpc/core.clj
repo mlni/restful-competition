@@ -57,7 +57,6 @@
 (defn test-thread-main []
   (loop []
     (let [start (start-timestamp)]
-      (println "Executing tests" (java.util.Date.))
       (test-loop!)
       (Thread/sleep (- *test-interval* (- (System/currentTimeMillis) start)))
       (recur))))
@@ -69,6 +68,9 @@
   (GET "/register" [] (register-page))
   (POST "/register" {params :params} (do-register (params :name) (params :url)))
   (GET "/player/:id" {params :params} (player-page (params :id)))
+  (GET "/admin" [] (admin-page))
+  (POST "/admin/switch" {params :params} (do-switch-suite (params :suite)))
+  (POST "/admin/reset" [] (do-reset-scores))
   (route/resources "/")
   (route/not-found "Page not found"))
 
@@ -80,4 +82,4 @@
   (println "Launching jetty")
   (run-jetty (app) {:port 8080 :join? false})
   (println "Launching testrunner")
-  (test-thread-main))
+  (.start (Thread. (fn [] (test-thread-main)))))
