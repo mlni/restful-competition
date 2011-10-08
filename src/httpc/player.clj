@@ -28,6 +28,9 @@
   (let [p (make-player name url)]
    (swap! *players* assoc (:id p) p)))
 
+(defn remove-player! [id]
+  (swap! *players* dissoc id))
+
 (defn score [status]
   ; status: :error :ok :fail :timeout
   (get {:ok 10

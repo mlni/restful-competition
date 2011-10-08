@@ -1,8 +1,12 @@
-* switching of test suites
-* reset scores after 0-th round
 * test display of IO exceptions
-* auto-reloading of scores page
 * deactivation of passive users
 * kicking users
-* truncate player log
+* graphing of points
 
+* track number of questions asked/correctly answered per player per suite
+
+
++ truncate player log
++ switching of test suites
++ reset scores after 0-th round
++ auto-reloading of scores pages

@@ -1,7 +1,9 @@
 (ns httpc.web
-  (:require (ring.util [response :as response]))
+  (:require (ring.util [response :as response])
+	    (clojure.contrib.json))
   (:use [hiccup core page-helpers form-helpers]
-	[httpc player test]))
+	[httpc player test]
+	[clojure.contrib.json]))
 
 
 (defn- non-blank? [s]
@@ -85,7 +87,12 @@
 (defn scores-fragment []
   (html (all-scores)))
 
-
+(defn scores-json-fragment []
+  (json-str
+   (reduce (fn [r p] (conj r {:id (:id p)
+			      :name (:name p)
+			      :score (:score p)}))
+	   [] (players-by-score))))
 
 (defn register-page [& [name url msg]]
   (layout
@@ -196,6 +203,23 @@
 	     [:input {:type "submit" :class "btn primary" :value "Reset"
 		      :onclick "return confirm('Sure?')"}]])))
 
+(defn graph-page []
+  (layout
+   (include-js "/js/smoothie.js")
+   (include-js "/js/leaderboard.js")
+   [:center
+    [:canvas#chart {:width 750 :height 250}]]
+   [:h2 "Players"
+    [:table.zebra-striped
+     [:thead
+      [:tr
+       [:th "Name"]
+       [:th "Color"]
+       [:th {:width "50%"} "Score"]
+       [:th "Action"]]]
+     [:tbody#scores
+      ]]]))
+
 (defn do-switch-suite [suite]
   (when (non-blank? suite)
     (switch-suite! suite))
@@ -204,3 +228,7 @@
 (defn do-reset-scores []
   (reset-scores!)
   (response/redirect "/admin"))
+
+(defn do-kick-player [id]
+  (remove-player! id)
+  (response/redirect "/admin/graph"))

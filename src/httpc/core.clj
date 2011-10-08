@@ -14,7 +14,7 @@
 
 ; configuration
 (def *timeout* 5000)
-(def *test-interval* 10000)
+(def *test-interval* 5000)
 
 
 (defn to-response [r]
@@ -72,8 +72,11 @@
   (GET "/player/:id/scores" {params :params} (player-scores-fragment (params :id)))
   
   (GET "/admin" [] (admin-page))
+  (GET "/admin/graph" [] (graph-page))
+  (GET "/admin/scores-json" [] (scores-json-fragment))  
   (POST "/admin/switch" {params :params} (do-switch-suite (params :suite)))
   (POST "/admin/reset" [] (do-reset-scores))
+  (POST "/admin/kick" {params :params} (do-kick-player (params :id)))
   (route/resources "/")
   (route/not-found "Page not found"))
 
