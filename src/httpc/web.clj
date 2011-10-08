@@ -1,9 +1,11 @@
 (ns httpc.web
   (:require (ring.util [response :as response])
-	    (clojure.contrib.json))
+	    (clojure.contrib.json)
+	    [compojure.route :as route])
   (:use [hiccup core page-helpers form-helpers]
 	[httpc player test]
-	[clojure.contrib.json]))
+	[clojure.contrib.json]
+	compojure.core))
 
 
 (defn- non-blank? [s]
@@ -232,3 +234,20 @@
 (defn do-kick-player [id]
   (remove-player! id)
   (response/redirect "/admin/graph"))
+
+(defroutes main-routes
+  (GET "/" [] (index-page))
+  (GET "/scores" [] (scores-fragment))  
+  (GET "/register" [] (register-page))
+  (POST "/register" {params :params} (do-register (params :name) (params :url)))
+  (GET "/player/:id" {params :params} (player-page (params :id)))
+  (GET "/player/:id/scores" {params :params} (player-scores-fragment (params :id)))
+  
+  (GET "/admin" [] (admin-page))
+  (GET "/admin/graph" [] (graph-page))
+  (GET "/admin/scores-json" [] (scores-json-fragment))  
+  (POST "/admin/switch" {params :params} (do-switch-suite (params :suite)))
+  (POST "/admin/reset" [] (do-reset-scores))
+  (POST "/admin/kick" {params :params} (do-kick-player (params :id)))
+  (route/resources "/")
+  (route/not-found "Page not found"))
