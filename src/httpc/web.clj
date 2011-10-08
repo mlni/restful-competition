@@ -3,7 +3,8 @@
 	    (clojure.contrib.json)
 	    [compojure.route :as route])
   (:use [hiccup core page-helpers form-helpers]
-	[httpc player test]
+	[httpc player]
+	[httpc.test common]
 	[clojure.contrib.json]
 	compojure.core))
 

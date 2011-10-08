@@ -1,4 +1,4 @@
-(ns httpc.test
+(ns httpc.test.common
   (:use [httpc.player])
   (:gen-class))
 
@@ -55,6 +55,7 @@
 (defn- assert-test [test resp]
   ((:expect test) resp))
 
+; rename to select tests?
 (defn create-tests []
   "Create test instances for each active player. The test instance
    contains the question to send to player as well as a closure to
