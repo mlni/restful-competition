@@ -1,12 +1,21 @@
 * test display of IO exceptions
 * deactivation of passive users
-* kicking users
-* graphing of points
-
+* implement arithmetic tests
+* refactor tests out of test support and testrunner
+* add support for stateful tests
 * track number of questions asked/correctly answered per player per suite
+* add proper logging
+* protect poller thread against exception
 
+test
+  common
+  arithmetic
+  stateful
+  suite - depended upon by web and runner
 
 + truncate player log
 + switching of test suites
 + reset scores after 0-th round
 + auto-reloading of scores pages
++ kicking users
++ graphing of points

@@ -1,7 +1,7 @@
 (ns httpc.runner
   (:require [http.async.client :as c])
   (:use [httpc player]
-	[httpc.test common])
+	[httpc.test common suite] :reload-all)
   (:gen-class))
 
 (def *timeout* 5000)

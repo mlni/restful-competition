@@ -4,9 +4,9 @@
 	    [compojure.route :as route])
   (:use [hiccup core page-helpers form-helpers]
 	[httpc player]
-	[httpc.test common]
+	[httpc.test suite]
 	[clojure.contrib.json]
-	compojure.core))
+	compojure.core :reload-all))
 
 
 (defn- non-blank? [s]
@@ -190,7 +190,7 @@
 	      (label :suite "Active suite:")
 	      [:div.input
 	       [:ul.inputs-list
-		(for [suite *suites*]
+		(for [suite (all-suites)]
 		  [:li
 		   [:label
 		    (radio-button :suite

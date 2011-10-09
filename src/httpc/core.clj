@@ -6,7 +6,8 @@
 	[ring.middleware (reload :only [wrap-reload])
                          (stacktrace :only [wrap-stacktrace])
                          [file-info :only [wrap-file-info]]]
-	compojure.core)
+	compojure.core
+	:reload-all)
   (:gen-class))
 
 

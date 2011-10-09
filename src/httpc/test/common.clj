@@ -2,9 +2,6 @@
   (:use [httpc.player])
   (:gen-class))
 
-(def *suites* [])
-(def *suite* (atom nil)) ; fixme: set initial value
-
 (defn- make-test [player request expectation]
   {:player player
    :request request
@@ -15,17 +12,23 @@
    :query params
    :headers headers})
 
+(defn- content-equals? [content expected]
+  (= (.toLowerCase (str expected)) (.. (str content) toLowerCase trim)))
+
 (defn- assert-content [expected]
   (fn [resp]
     (let [[s msg]
 	  (cond (:error resp) [:error (:error resp)]
 		(not= 200 (:code (:status resp))) [:error "Server did not respond with 200"]
-		(= expected (:content resp)) [:ok "Correct"]
+		(content-equals? (:content resp) expected) [:ok "Correct"]
 		:else [:fail "Wrong answer!"])]
       (make-log-event s msg))))
 
 (defn- random-int [min max]
   (+ min (rand-int (- max min))))
+
+(defn- random-ints [n min max]
+  (repeatedly n #(random-int min max)))
 
 (defn test-your-name [p]
   (make-test p
@@ -33,53 +36,32 @@
 				  :headers {:foo-bar "Bar"}})
 	     (assert-content (:name p))))
 
-(defn test-sum-numbers [p]
-  (let [a (random-int 1 10)
-	b (random-int 1 10)]
+(defn- two-number-arithmetic [p msg op]
+  (let [[a b] (random-ints 2 1 20)]
     (make-test p
-	       (to-question p {:params {:q (str "How much is " a " + " b)}})
-	       (assert-content (str (+ a b))))))
+	       (to-question p {:params {:q (format msg  a b)}})
+	       (assert-content (str (op a b))))))
+
+(defn test-sum-numbers [p]
+  (two-number-arithmetic p "How much is %s + %s" +))
+
+(defn test-mul-numbers [p]
+  (two-number-arithmetic p "How much is %s * %s" *))
+
+(defn test-subtract-numbers [p]
+  (two-number-arithmetic p "How much is %s - %s" -))
 
 (defn test-largest-number [p]
-  (let [a (random-int 1 100)
-	b (random-int 1 100)
-	c (random-int 1 100)]
+  (let [ns (random-ints 5 1 1000)]
     (make-test p
 	       (to-question p {:params {:q (str "Which of the numbers is largest: "
-						a ", " b ", " c)}})
-	       (assert-content (str (max a b c))))))
-
-(defn- random-test [p]
-  ((rand-nth (:tests (deref *suite*))) p))
+						(apply str (interpose ", " ns)))}})
+	       (assert-content (str (apply max ns))))))
 
 (defn- assert-test [test resp]
   ((:expect test) resp))
-
-; rename to select tests?
-(defn create-tests []
-  "Create test instances for each active player. The test instance
-   contains the question to send to player as well as a closure to
-   validate the result."
-  (doall
-   (for [player (active-players)]
-     (random-test player))))
 
 (defn assert-response! [test resp]
   "Assert the received response against the expected result."
   (let [log-entry (assert-test test resp)]
     (record-event! (:player test) log-entry)))
-
-(defn switch-suite! [s]
-  (let [suite (first (filter #(= (:name %) s) *suites*))]
-    (reset! *suite* suite)))
-
-(defn- make-suite [name tests]
-  {:name name :tests tests})
-
-(defn- init []
-  (def *suites* [(make-suite "Trivial" [test-your-name])
-		 (make-suite "Simple" [test-sum-numbers
-				       test-largest-number])])
-  (switch-suite! "Simple"))
-
-(init)
