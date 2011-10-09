@@ -21,9 +21,13 @@
     (> delta *timeout*)))
 
 (defn- fire-request [client test]
-  (let [r (:request test)]
+  (let [r (:request test)
+	method (get {:get c/GET :put c/PUT
+		     :post c/POST :delete c/DELETE
+		     :head c/HEAD} (:method r) c/GET)
+	headers (merge {"User-Agent" "RESTful Competition/1.0"} (:headers r))]
     {:test test
-     :response (c/GET client (:url r) :query (:query r) :headers (:headers r))}))
+     :response (method client (:url r) :query (:query r) :headers headers)}))
 
 (def split-by-pred (juxt filter remove))
 

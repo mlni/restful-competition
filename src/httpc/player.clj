@@ -67,6 +67,10 @@
      (reset! *players*
 	    (reduce (fn [r k] (assoc-in r [k :score] 0)) ps (keys ps))))))
 
+(defn update-player-attr! [p path val]
+  (let [key (concat [(:id p)] path)]
+   (swap! *players* assoc-in key val)))
+
 (defn- init []
   (reset! *players* {})
   (doseq [[name url] '[("matti" "http://localhost:4000/")

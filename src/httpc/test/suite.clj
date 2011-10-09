@@ -6,7 +6,6 @@
 (def *suites* (atom []))
 (def *suite* (atom nil)) ; fixme: set initial value
 
-
 (defn all-suites []
   (deref *suites*))
 
@@ -18,8 +17,9 @@
   {:name name :tests tests})
 
 (defn- random-test [p]
-  (let [tst (rand-nth (:tests (deref *suite*)))]
-   (tst p)))
+  (let [test-fn (rand-nth (:tests (deref *suite*)))
+	test-name (function-name test-fn)]
+   (setup-test test-fn p)))
 
 ; rename to select tests?
 (defn create-tests []
@@ -33,11 +33,12 @@
 
 (defn- init []
   (reset! *suites* [(make-suite "Trivial" [test-your-name])
-		    (make-suite "Simple" [test-sum-numbers
-					  test-mul-numbers
-					  test-subtract-numbers
+		    (make-suite "Simple" [test-two-number-arithmetic
+					  test-arithmetic-with-params
 					  test-largest-number
-					  ])])
-  (switch-suite! "Simple"))
+					  test-user-agent
+					  ])
+		    (make-suite "Dev" [test-restful-resource])])
+  (switch-suite! "Dev"))
 
 (init)

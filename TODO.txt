@@ -1,11 +1,9 @@
-* test display of IO exceptions
 * deactivation of passive users
-* implement arithmetic tests
-* refactor tests out of test support and testrunner
 * add support for stateful tests
 * track number of questions asked/correctly answered per player per suite
 * add proper logging
 * protect poller thread against exception
+* replace players atom with ref as it is modified from multiple threads
 
 test
   common
@@ -19,3 +17,6 @@ test
 + auto-reloading of scores pages
 + kicking users
 + graphing of points
+* refactor tests out of test support and testrunner
+* implement arithmetic tests
+* test display of IO exceptions
