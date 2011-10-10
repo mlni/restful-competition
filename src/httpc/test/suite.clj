@@ -17,8 +17,7 @@
   {:name name :tests tests})
 
 (defn- random-test [p]
-  (let [test-fn (rand-nth (:tests (deref *suite*)))
-	test-name (function-name test-fn)]
+  (let [test-fn (rand-nth (:tests (deref *suite*)))]
    (setup-test test-fn p)))
 
 ; rename to select tests?

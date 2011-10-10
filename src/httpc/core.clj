@@ -1,18 +1,22 @@
 (ns httpc.core
   (:require [compojure.route :as route]
             [compojure.handler :as handler])
-  (:use [httpc player test web runner]
+  (:use [httpc player web runner]
 	[ring.adapter.jetty :only [run-jetty]]
 	[ring.middleware (reload :only [wrap-reload])
                          (stacktrace :only [wrap-stacktrace])
                          [file-info :only [wrap-file-info]]]
-	compojure.core
-	:reload-all)
+	compojure.core)
   (:gen-class))
 
+(defroutes main-routes
+  public-routes
+  admin-routes
+  (route/resources "/")
+  (route/not-found "Page not found"))
 
 (defn app []
-  (-> main-routes
+  (-> #'main-routes
       handler/site))
 
 (defn- start-webserver []

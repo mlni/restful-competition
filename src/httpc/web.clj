@@ -87,15 +87,21 @@
         }, 5000);
       });"))))
 
-(defn scores-fragment []
-  (html (all-scores)))
-
 (defn scores-json-fragment []
-  (json-str
-   (reduce (fn [r p] (conj r {:id (:id p)
-			      :name (:name p)
-			      :score (:score p)}))
-	   [] (players-by-score))))
+  (let [body (reduce (fn [r p] (conj r {:id (:id p)
+					:name (:name p)
+					:score (:score p)}))
+		     [] (players-by-score))]
+    (-> (response/response (json-str body))
+	(response/content-type "application/json"))))
+
+(defn- accepts-json? [headers]
+  (re-find #"application/json" (str (headers "accept"))))
+
+(defn scores-fragment [h]
+  (if (accepts-json? h)
+    (scores-json-fragment)
+    (html (all-scores))))
 
 (defn register-page [& [name url msg]]
   (layout
@@ -236,19 +242,17 @@
   (remove-player! id)
   (response/redirect "/admin/graph"))
 
-(defroutes main-routes
+(defroutes public-routes
   (GET "/" [] (index-page))
-  (GET "/scores" [] (scores-fragment))  
+  (GET "/scores" {h :headers} (scores-fragment h))
   (GET "/register" [] (register-page))
   (POST "/register" {params :params} (do-register (params :name) (params :url)))
   (GET "/player/:id" {params :params} (player-page (params :id)))
-  (GET "/player/:id/scores" {params :params} (player-scores-fragment (params :id)))
-  
+  (GET "/player/:id/scores" {params :params} (player-scores-fragment (params :id))))
+
+(defroutes admin-routes
   (GET "/admin" [] (admin-page))
   (GET "/admin/graph" [] (graph-page))
-  (GET "/admin/scores-json" [] (scores-json-fragment))  
   (POST "/admin/switch" {params :params} (do-switch-suite (params :suite)))
   (POST "/admin/reset" [] (do-reset-scores))
-  (POST "/admin/kick" {params :params} (do-kick-player (params :id)))
-  (route/resources "/")
-  (route/not-found "Page not found"))
+  (POST "/admin/kick" {params :params} (do-kick-player (params :id))))
