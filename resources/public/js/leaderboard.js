@@ -48,9 +48,10 @@
   }
   function update() {
     $.ajax({
-      url: '/admin/scores-json',
+      url: '/scores',
+      dataType: 'json',
       success: function(data) {
-        var players = JSON.parse(data);
+        var players = data;
         updateChart(players);
         updateScoreBoard(players);
       }
