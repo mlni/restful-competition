@@ -1,6 +1,7 @@
 (ns httpc.test.suite
   (:use [httpc.player]
-	[httpc.test common])
+	[httpc.test common rest]
+	:reload-all)
   (:gen-class))
 
 (def *suites* (atom []))
