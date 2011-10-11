@@ -1,7 +1,8 @@
 (ns httpc.runner
   (:require [http.async.client :as c])
   (:use [httpc player]
-	[httpc.test common suite] :reload-all)
+	[httpc.test common suite]
+	:reload-all)
   (:gen-class))
 
 (def *timeout* 5000)
@@ -49,10 +50,13 @@
 		  (recur remaining))))))))
 
 (defn test-thread-main []
-  (loop []
-    (let [start (start-timestamp)]
-      (test-loop!)
-      (let [delay (- *test-interval* (- (System/currentTimeMillis) start))]
-	(when (pos? delay)
-	 (Thread/sleep delay)))
-      (recur))))
+  (try
+    (loop []
+      (let [start (start-timestamp)]
+	(test-loop!)
+	(let [delay (- *test-interval* (- (System/currentTimeMillis) start))]
+	  (when (pos? delay)
+	    (Thread/sleep delay)))
+	(recur)))
+    (catch Exception e
+      (.printStackTrace e))))

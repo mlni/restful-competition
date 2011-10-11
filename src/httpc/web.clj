@@ -242,6 +242,9 @@
   (remove-player! id)
   (response/redirect "/admin/graph"))
 
+(defn authenticated? [name pass]
+  (and (= name "admin") (= pass "admin123")))
+
 (defroutes public-routes
   (GET "/" [] (index-page))
   (GET "/scores" {h :headers} (scores-fragment h))
