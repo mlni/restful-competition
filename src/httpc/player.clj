@@ -3,7 +3,7 @@
 
 (def *max-log-items* 20)
 
-(def *players* (atom {}))
+(def *players* (ref {}))
 
 (defn generate-id []
   (let [keys "0123456789abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ"]
@@ -26,10 +26,12 @@
 
 (defn add-player! [name url]
   (let [p (make-player name url)]
-   (swap! *players* assoc (:id p) p)))
+    (dosync
+     (alter *players* assoc (:id p) p))))
 
 (defn remove-player! [id]
-  (swap! *players* dissoc id))
+  (dosync
+   (alter *players* dissoc id)))
 
 (defn score [status]
   ; status: :error :ok :fail :timeout
@@ -54,8 +56,8 @@
 (defn record-event! [player evt]
   (when (@*players* (:id player))
    (dosync
-    (swap! *players* update-in [(:id player) :score] + (:score evt))
-    (swap! *players* update-in [(:id player) :log] #(take *max-log-items*
+    (alter *players* update-in [(:id player) :score] + (:score evt))
+    (alter *players* update-in [(:id player) :log] #(take *max-log-items*
 							  (conj % evt))))))
 
 (defn record-timeout! [resps]
@@ -65,7 +67,7 @@
 (defn reset-scores! []
   (dosync
    (let [ps (deref *players*)]
-     (reset! *players*
+     (alter *players*
 	    (reduce (fn [r k] (assoc-in r [k :score] 0)) ps (keys ps))))))
 
 (defn save-data! []
@@ -76,15 +78,17 @@
 (defn load-data! []
   (let [data (read-string (slurp "data/players.txt"))]
     (dosync
-     (reset! *players* data))))
+     (alter *players* data))))
 
 (defn update-player-attr! [p path val]
   (let [key (concat [(:id p)] path)]
-   (swap! *players* assoc-in key val)))
+    (dosync
+     (alter *players* assoc-in key val))))
 
 (defn- init []
-  (reset! *players* {})
-  (doseq [[name url] '[("matti" "http://localhost:4000/")]]
-    (add-player! name url)))
+  (dosync
+   (alter *players* {})
+   (doseq [[name url] '[("matti" "http://localhost:4000/")]]
+     (add-player! name url))))
 
 (init)
