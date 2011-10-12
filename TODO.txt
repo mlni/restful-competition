@@ -1,9 +1,27 @@
 * deactivation of passive users
-* add support for stateful tests
 * track number of questions asked/correctly answered per player per suite
 * add proper logging
 * protect poller thread against exception
 * replace players atom with ref as it is modified from multiple threads
+* add session test
+* add per test scores
+* per user request delays
+* support redirects?
+* show whether the user has answered all tests in the current suite
+
+exercises:
+
+* cookie test. how much is a + b with a and b being cookies
+* session test. how much is a + b with a and b being provided in previous requests
+* etag & if-modified-since/if-none-match headers and REST
+* Referer header
+* http HEAD with rest resource
+* accept: header and different content representations
+
+rest
+* content type check
+* Range header
+
 
 test
   common
@@ -20,3 +38,4 @@ test
 * refactor tests out of test support and testrunner
 * implement arithmetic tests
 * test display of IO exceptions
+* add support for stateful tests
