@@ -7,27 +7,26 @@
 	[ring.middleware (reload :only [wrap-reload])
                          (stacktrace :only [wrap-stacktrace])
                          [file-info :only [wrap-file-info]]]
-	remvee.ring.middleware.basic-authentication
+	ring.middleware.http-basic-auth
 	compojure.core
 	:reload-all)
   (:gen-class))
 
 (defroutes main-routes
   public-routes
-  (-> admin-routes
-      (wrap-basic-authentication authenticated?))
   (route/resources "/")
+  (wrap-require-auth admin-routes authenticate "Admin area" {:body "This is not part of the game"})
   (route/not-found "Page not found"))
 
 (defn app []
   (-> #'main-routes
       handler/site))
 
-(defn- start-webserver []
+(defn start-webserver []
   (println "Launching jetty")
   (run-jetty (app) {:port 8080 :join? false}))
 
-(defn- start-poller []
+(defn start-poller []
   (println "Launching testrunner")
   (.start (Thread. (fn [] (test-thread-main)))))
 

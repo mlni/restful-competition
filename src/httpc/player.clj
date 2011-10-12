@@ -73,8 +73,7 @@
 
 (defn- init []
   (reset! *players* {})
-  (doseq [[name url] '[("matti" "http://localhost:4000/")
-		       ("bill" "http://localhost:4001/")]]
+  (doseq [[name url] '[("matti" "http://localhost:4000/")]]
     (add-player! name url)))
 
 (init)

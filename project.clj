@@ -6,7 +6,7 @@
                  [compojure "0.6.4"]
 		 [ring "0.3.10"]
 		 [hiccup "0.3.6"]
-		 [ring-basic-authentication "0.0.1"]]
+		 [ring-http-basic-auth "0.0.1"]]
   :dev-dependencies [[lein-clojars "0.5.0-SNAPSHOT"]
                      [swank-clojure "1.2.1"]
 		     [midje "1.2.0"]]

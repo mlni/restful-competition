@@ -242,7 +242,7 @@
   (remove-player! id)
   (response/redirect "/admin/graph"))
 
-(defn authenticated? [name pass]
+(defn authenticate [name pass]
   (and (= name "admin") (= pass "admin123")))
 
 (defroutes public-routes
