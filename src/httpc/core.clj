@@ -20,6 +20,7 @@
 
 (defn app []
   (-> #'main-routes
+      (wrap-stacktrace)
       handler/site))
 
 (defn start-webserver []

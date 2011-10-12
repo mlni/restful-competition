@@ -210,7 +210,17 @@
 	    [:p "Reset all scores to zero in order to start from a new suite."]
 	    [:div.actions
 	     [:input {:type "submit" :class "btn primary" :value "Reset"
-		      :onclick "return confirm('Sure?')"}]])))
+		      :onclick "return confirm('Sure?')"}]
+	     ])
+   (form-to [:post "/admin/backup"]
+	    [:h3 "Save/restore game state"]
+	    [:p "Save the whole game state into permanent storage or restore it from storage."]
+	    [:div.actions
+	     [:input {:type "submit" :class "btn primary" :name "save" :value "Save"}]
+	     "&nbsp;"
+	     [:input {:type "submit" :class "btn danger" :name "restore" :value "Restore"
+		      :onclick "return confirm('Sure?')"}]
+	     ])))
 
 (defn graph-page []
   (layout
@@ -242,6 +252,16 @@
   (remove-player! id)
   (response/redirect "/admin/graph"))
 
+(defn do-backup [p]
+  (println "do-backup" p)
+  (when (p :save)
+    (println "saving")
+    (save-data!))
+  (when (p :restore)
+    (println "restoring")
+    (load-data!))
+  (response/redirect "/admin"))
+
 (defn authenticate [name pass]
   (and (= name "admin") (= pass "admin123")))
 
@@ -258,4 +278,5 @@
   (GET "/admin/graph" [] (graph-page))
   (POST "/admin/switch" {params :params} (do-switch-suite (params :suite)))
   (POST "/admin/reset" [] (do-reset-scores))
-  (POST "/admin/kick" {params :params} (do-kick-player (params :id))))
+  (POST "/admin/kick" {params :params} (do-kick-player (params :id)))
+  (POST "/admin/backup" {params :params} (do-backup params)))

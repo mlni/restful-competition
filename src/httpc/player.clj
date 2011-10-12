@@ -48,7 +48,7 @@
   (let [{status :status msg :msg} result]
     {:time (System/currentTimeMillis)
      :status status
-     :message msg
+     :message (str msg)
      :score (score status)}))
 
 (defn record-event! [player evt]
@@ -66,6 +66,16 @@
    (let [ps (deref *players*)]
      (reset! *players*
 	    (reduce (fn [r k] (assoc-in r [k :score] 0)) ps (keys ps))))))
+
+(defn save-data! []
+  (let [data (binding [*print-dup* true]
+	       (print-str @*players*))]
+   (spit "data/players.txt" data)))
+
+(defn load-data! []
+  (let [data (read-string (slurp "data/players.txt"))]
+    (dosync
+     (reset! *players* data))))
 
 (defn update-player-attr! [p path val]
   (let [key (concat [(:id p)] path)]
