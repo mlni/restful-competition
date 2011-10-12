@@ -130,7 +130,6 @@
   "Assert the received response against the expected result."
   (let [result (assert-test test resp)
 	log-entry (make-log-event result)]
-    (println "assert-response! " log-entry)
     (when (:next-state test)
       (let [ns ((:next-state test) test result resp)]
 	(println "Updating state!" ns)

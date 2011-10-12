@@ -28,7 +28,9 @@
 		     :head c/HEAD} (:method r) c/GET)
 	headers (merge {"User-Agent" "RESTful Competition/1.0"} (:headers r))]
     {:test test
-     :response (method client (:url r) :query (:query r) :headers headers :body (:body r))}))
+     :response (method client (:url r)
+		       :query (:query r) :headers headers :body (:body r)
+		       :timeout *timeout*)}))
 
 (def split-by-pred (juxt filter remove))
 
@@ -50,13 +52,14 @@
 		  (recur remaining))))))))
 
 (defn test-thread-main []
-  (try
-    (loop []
-      (let [start (start-timestamp)]
+  (loop []
+    (let [start (start-timestamp)]
+	
+      (try
 	(test-loop!)
-	(let [delay (- *test-interval* (- (System/currentTimeMillis) start))]
-	  (when (pos? delay)
-	    (Thread/sleep delay)))
-	(recur)))
-    (catch Exception e
-      (.printStackTrace e))))
+	(catch Exception e
+	  (.printStackTrace e)))
+      (let [delay (- *test-interval* (- (System/currentTimeMillis) start))]
+	(when (pos? delay)
+	  (Thread/sleep delay)))
+      (recur))))

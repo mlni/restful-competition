@@ -52,14 +52,15 @@
      :score (score status)}))
 
 (defn record-event! [player evt]
-  (dosync
-   (swap! *players* update-in [(:id player) :score] + (:score evt))
-   (swap! *players* update-in [(:id player) :log] #(take *max-log-items*
-							      (conj % evt)))))
+  (when (@*players* (:id player))
+   (dosync
+    (swap! *players* update-in [(:id player) :score] + (:score evt))
+    (swap! *players* update-in [(:id player) :log] #(take *max-log-items*
+							  (conj % evt))))))
 
 (defn record-timeout! [resps]
   (doseq [r resps]
-    (record-event! (:player r) (make-log-event {:status :timeout :message "Request timed out"}))))
+    (record-event! (:player r) (make-log-event {:status :timeout :msg "Request timed out"}))))
 
 (defn reset-scores! []
   (dosync
