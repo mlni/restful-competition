@@ -44,14 +44,14 @@
 (defn players-by-score []
   (reverse (sort-by :score (all-players))))
 
-(defn make-log-event [status message]
-  {:time (System/currentTimeMillis)
-   :status status
-   :message message
-   :score (score status)})
+(defn make-log-event [result]
+  (let [{status :status msg :msg} result]
+    {:time (System/currentTimeMillis)
+     :status status
+     :message msg
+     :score (score status)}))
 
 (defn record-event! [player evt]
-  ; todo: add truncation of log
   (dosync
    (swap! *players* update-in [(:id player) :score] + (:score evt))
    (swap! *players* update-in [(:id player) :log] #(take *max-log-items*
@@ -59,7 +59,7 @@
 
 (defn record-timeout! [resps]
   (doseq [r resps]
-    (record-event! (:player r) (make-log-event :timeout "Request timed out"))))
+    (record-event! (:player r) (make-log-event {:status :timeout :message "Request timed out"}))))
 
 (defn reset-scores! []
   (dosync

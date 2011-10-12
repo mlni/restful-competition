@@ -28,7 +28,7 @@
 		     :head c/HEAD} (:method r) c/GET)
 	headers (merge {"User-Agent" "RESTful Competition/1.0"} (:headers r))]
     {:test test
-     :response (method client (:url r) :query (:query r) :headers headers)}))
+     :response (method client (:url r) :query (:query r) :headers headers :body (:body r))}))
 
 (def split-by-pred (juxt filter remove))
 

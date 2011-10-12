@@ -3,17 +3,25 @@
 	[clojure.contrib.str-utils :only [str-join]])
   (:gen-class))
 
-(defn make-test [player request expectation & {:keys [save]}]
-  {:player player
-   :request request
-   :expect expectation
-   :state save})
+(defn make-test [player request expectation & {:as kv-pairs}]
+  (merge kv-pairs
+	 {:player player
+	  :request request
+	  :expect expectation}))
 
-(defn to-question [player & {:keys [suffix params headers method]}]
-  {:url (str (:url player) suffix)
+(defn- concatenate-url [prefix suffix]
+  (if (and suffix
+	   (.endsWith prefix "/")
+	   (.startsWith suffix "/"))
+    (str prefix (subs suffix 1))
+    (str prefix suffix)))
+
+(defn to-question [player & {:keys [suffix params headers method body]}]
+  {:url (concatenate-url (:url player) suffix)
    :query params
    :headers headers
-   :method method})
+   :method method
+   :body body})
 
 (defn- function-name [f]
   (str (:name (meta f))))
@@ -21,34 +29,39 @@
 (defn- content-equals? [content expected]
   (= (.toLowerCase (str expected)) (.. (str content) toLowerCase trim)))
 
+(defn- result
+  ([[s m]] (result s m))
+  ([status msg]
+     {:status status
+      :msg msg}))
+
 (defn- is-non-positive-code? [code]
   (let [code-int (int (if code code 0))]
     (not (<= 200 code-int 299))))
 
 (defn respond-error
   ([] (respond-error "Server did not respond with 200"))
-  ([msg] [:error msg]))
+  ([msg] (result [:error msg])))
 
 (defn respond-correct []
-  [:ok "Correct"])
+  (result [:ok "Correct"]))
 
-(defn respond-fail []
-  [:fail "Wrong answer!"])
+(defn respond-fail
+  ([] (respond-fail "Wrong answer!"))
+  ([msg] (result [:fail msg])))
 
 (defn on-success [resp pred]
   (cond (:error resp) (respond-error (:error resp))
 	(is-non-positive-code? (:code (:status resp))) (respond-error)
-	(vector? pred) pred
+	(map? pred) pred
 	:else (pred)))
 
-(defn- assert-content [expected]
+(defn assert-content [expected]
   (fn [resp & more]
-    (let [[s msg]
-	  (on-success resp
-		      #(if (content-equals? (:content resp) expected)
-			 (respond-correct)
-			 (respond-fail)))]
-      (make-log-event s msg))))
+    (on-success resp
+		#(if (content-equals? (:content resp) expected)
+		   (respond-correct)
+		   (respond-fail)))))
 
 (defn- random-int [min max]
   (+ min (rand-int (- max min))))
@@ -116,11 +129,10 @@
 (defn assert-response! [test resp]
   "Assert the received response against the expected result."
   (let [result (assert-test test resp)
-	_ (println "_ " result)
-	[log-entry test-state] (if (map? result)
-				 [result nil]
-				 (let [[log state] result]
-				   [log state]))]
-    (println "assert-response! " log-entry " " test-state)
-    (update-player-attr! (:player test) [:test-state (:name test)] test-state)
+	log-entry (make-log-event result)]
+    (println "assert-response! " log-entry)
+    (when (:next-state test)
+      (let [ns ((:next-state test) test result resp)]
+	(println "Updating state!" ns)
+	(update-player-attr! (:player test) [:test-state (:name test)] ns)))
     (record-event! (:player test) log-entry)))

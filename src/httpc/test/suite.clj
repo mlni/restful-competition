@@ -37,7 +37,7 @@
 					  test-arithmetic-with-params
 					  test-largest-number
 					  test-user-agent
-					  ])
+					  test-restful-resource])
 		    (make-suite "Dev" [test-restful-resource])])
   (switch-suite! "Dev"))
 

@@ -4,54 +4,57 @@
 	:reload-all)
   (:gen-class))
 
-(defn expect-success [next-state & args]
+(defn expect-success [_]
   (fn [r]
-    (let [[status msg] (on-success r (respond-correct))]
-      (if (= status :ok)
-	[(make-log-event status msg) next-state]
-	(make-log-event status msg)))))
+    (on-success r (respond-correct))))
 
-(defn expect-content [next-state session]
+(defn expect-content [session]
+  (println "expect-content " (:content session))
   (assert-content (:content session)))
 
-(defn expect-not-found [next-state & args]
+(defn expect-not-found [_]
   (fn [r]
-    (cond (:error r) (apply make-log-event (respond-error (:error r)))
-	  (= 404 (:code (:status r)))
-	  [(apply make-log-event (respond-correct)) next-state]
-	  :else (apply make-log-event (respond-fail)))))
+    (cond (:error r) (respond-error (:error r))
+	  (= 404 (:code (:status r))) (respond-correct)
+	  :else (respond-fail "Server did not respond with 404"))))
 
-(defn put-resource [p assert]
-  (make-test p
-	     (to-question p
-			  :method :put
-			  :suffix "/resource/foo")
-	     assert))
+(defn put-resource [p]
+  (let [random-content (generate-id)]
+    (to-question p
+		 :method :put
+		 :suffix "/resource/bar"
+		 :body random-content)))
 
-(defn get-resource [p assert]
-  (make-test p
-	     (to-question p
-			  :method :get
-			  :suffix "/resource/foo")
-	     assert))
+(defn get-resource [p]
+  (to-question p
+	       :method :get
+	       :suffix "/resource/bar"))
 
-(defn delete-resource [p assert]
-  (make-test p
-	     (to-question p
-			  :method :delete
-			  :delete "/resource/foo")
-	     assert))
+(defn delete-resource [p]
+  (to-question p
+	       :method :delete
+	       :suffix "/resource/bar"))
 
+(defn- update-state-on-success [n]
+  (fn [test result response]
+    (when (= :ok (:status result))
+      (if (:body (:request test))
+	; save the content used in PUT for later asserts
+	(assoc n :content (:body (:request test)))
+	n))))
 
 (def *state-machine*
      {nil      [put-resource expect-success :saved]
-      :saved   [get-resource expect-success :loaded]
+      :saved   [get-resource expect-content :loaded]
       :loaded  [delete-resource expect-success :deleted]
       :deleted [get-resource expect-not-found nil]})
 
 (defn test-restful-resource [p & {session :state}]
   "Test PUT/GET/DELETE cycle of a resource"
-  (let [state (:state session)
-	[test-fn assert-fn next-state] (*state-machine* state)
+  (let [current-state (:state session)
+	[test-fn assert-fn next-state] (*state-machine* current-state)
 	next {:state next-state}]
-    (test-fn p (assert-fn next session))))
+    (make-test p
+	       (test-fn p)
+	       (assert-fn session)
+	       :next-state (update-state-on-success next))))
