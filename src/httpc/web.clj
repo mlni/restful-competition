@@ -9,6 +9,16 @@
 	compojure.core :reload-all))
 
 
+(def *administrator* nil)
+
+(defn wrap-authorization [app]
+  (fn [req]
+    (if (contains? (:headers req) "authorization")
+      (binding [*administrator* true]
+	(app req))
+      (app req))))
+
+
 (defn- non-blank? [s]
   (and (not (nil? s))
        (not= "" (.trim s))))
@@ -39,7 +49,11 @@
        [:a.brand {:href "/"} "RESTful competition"]
        [:ul.nav
 	[:li
-	 (link-to "/register" "Register player")]]]]]
+	 (link-to "/register" "Register player")]
+	(when *administrator*
+	  [:li (link-to "/admin" "Configure")])
+	(when *administrator*
+	  [:li (link-to "/admin/graph" "Overview")])]]]]
     [:div.container
      body]]))
 

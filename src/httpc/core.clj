@@ -20,6 +20,7 @@
 
 (defn app []
   (-> #'main-routes
+      wrap-authorization
       (wrap-stacktrace)
       handler/site))
 
