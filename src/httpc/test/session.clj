@@ -48,7 +48,9 @@
 	(dissoc sessions sid)))))
 
 (defn test-my-name-session [p & {sessions :state}]
-  (let [[sid session] (pick-random-session sessions 2)
+  (let [correct-answers (get-in p [:completed-tests "test-my-name-session"] 0)
+	parallel-session (if (> correct-answers 5) 3 1)
+	[sid session] (pick-random-session sessions parallel-session)
 	[test-fn next-state] (session-statemachine (session :state))
 	session (test-fn session)]
    (make-test p
@@ -58,4 +60,5 @@
 				      nil)
 			   :session session)
 	      (expect-name session)
-	      :next-state (calculate-next-state next-state (assoc sessions sid session) sid))))
+	      :next-state (calculate-next-state next-state (assoc sessions sid session) sid)
+	      :final (nil? next-state))))
