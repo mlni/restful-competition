@@ -32,11 +32,14 @@
       var colour = colourTable[player.id];
 
       (function(id) {
+	var completed = (player.completed == player.total);
         body.append(
           $("<tr/>")
             .append("<td>" + player.name + "</td>")
             .append("<td><div style='width: 20px; background-color: " + colour + "'>&nbsp;</div></td>")
             .append("<td>" + player.score + "</td>")
+            .append("<td>" + player.completed + " / " + player.total +
+		    (completed ? " <span class='label success'>OK</span>" : "") + "</td>")
             .append($("<td/>")
               .append($("<a>Kick</a>")
                 .attr("href", "#")
