@@ -67,6 +67,7 @@
 		  (recur remaining))))))))
 
 (defn test-thread-main []
+  (reset! *terminate* false)
   (loop []
     (let [start (start-timestamp)]
       (try

@@ -42,7 +42,7 @@
 	n))))
 
 (defn- is-last-state? [sm s]
-  (= s (first (last sm))))
+  (nil? (last (sm s))))
 
 (def *state-machine*
      {nil      [put-resource expect-success :saved]

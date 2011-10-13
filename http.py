@@ -1,4 +1,4 @@
-import sys, cgi, re, operator
+import sys, cgi, re, operator, random
 from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 
 REST_STATE = {}
@@ -13,10 +13,13 @@ class MyServer(BaseHTTPRequestHandler):
         print params
         print self.headers
         if "q" in params:
+            head, body = solve(params, self.headers) 
             self.send_response(200, 'OK')
             self.send_header('Content-type', 'text/html')
+            for [k, v] in head:
+                self.send_header(k, v)
             self.end_headers()
-            self.wfile.write( solve(params, self.headers) )
+            self.wfile.write( body )
         else:
             if self.path in REST_STATE:
                 self.send_response(200, 'OK')
@@ -72,23 +75,47 @@ def referer(h):
     ref = h.get("Referer")
     return ref
 
+SESSION_ID = 1
+
+def sid():
+    global SESSION_ID
+    SESSION_ID+=1
+    return str(SESSION_ID)
+
 def solve(params, headers):
     if "q" not in params:
         return NAME
+    global SESSIONS
+    out = []
+    result = NAME
     
     q = params["q"][0]
     if q.find("largest") != -1:
         # Which of the numbers is largest: 841, 973, 279, 146, 923
-        return largest_number(q)
+        result = largest_number(q)
     elif re.search("[a-z] [\+*-] [a-z]", q):
-        return arithm_params(q, params)
+        result = arithm_params(q, params)
     elif re.search("[0-9]+ [\+*-] [0-9]+", q):
-        return arithm(q)
+        result = arithm(q)
     elif q.find("Which page am I coming from") != -1:
-        return referer(headers)
-    return NAME
+        result = referer(headers)
+    elif q.find("My name is") != -1:
+        name = re.search("My name is (\w+)\.", q).group(1)
+        s = sid()
+        SESSIONS[s] = name
+        out.append(["Set-Cookie", "SID=%s; domain=localhost" % s])
+        if random.random() > 0.5:
+            out.append(["Set-Cookie", "FOO=13; domain=localhost"])
+        result = name
+    elif q.find("What is my name") != -1:
+        s = headers.get("Cookie").split(";")[0].split("=")[1]
+        print "Got sid", s
+        name = SESSIONS[s]
+        result = name
+    return (out, result)
 
 if __name__ == "__main__":
     NAME=sys.argv[2]
+    SESSIONS={}
     MyServer.serve_forever(int(sys.argv[1]))
     print largest_number("Which of the numbers is largest: 841, 973, 279, 146, 923")

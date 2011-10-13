@@ -1,6 +1,6 @@
 (ns httpc.test.suite
   (:use [httpc.player]
-	[httpc.test common simple rest]
+	[httpc.test common simple rest session]
 	:reload-all)
   (:gen-class))
 
@@ -41,8 +41,9 @@
 					  test-largest-number
 					  test-user-agent
 					  test-referer
-					  test-restful-resource])
-		    (make-suite "Dev" [test-cookies])])
+					  test-restful-resource
+					  test-cookies])
+		    (make-suite "Dev" [test-my-name-session])])
   (switch-suite! "Dev"))
 
 (init)
