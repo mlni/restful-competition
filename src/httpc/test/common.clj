@@ -76,5 +76,7 @@
 	(set-player-attr! (:player test) [:test-state test-name] ns)))
     (when (and (= :ok (:status result))
 	       (:final test))
-      (update-player-attr! (:player test) [:completed-tests] #(conj % test-name)))
+      (update-player-attr! (:player test) [:completed-tests]
+			   #(update-in % [test-name]
+				       (fn [v] (inc (or v 0))))))
     (record-event! (:player test) log-entry)))

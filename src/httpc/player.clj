@@ -14,7 +14,7 @@
 
 (defn make-player [name url]
   {:name name :url url :log '() :score 0 :id (generate-id)
-   :completed-tests #{}})
+   :completed-tests {}})
 
 (defn- all-players []
   (-> *players*
@@ -80,7 +80,7 @@
 
 (defn reset-progress! []
   (dosync
-   (alter *players* (set-all-attrs :completed-tests #{}))))
+   (alter *players* (set-all-attrs :completed-tests {}))))
 
 (defn save-data! []
   (let [data (binding [*print-dup* true]

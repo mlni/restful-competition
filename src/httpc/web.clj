@@ -246,7 +246,7 @@
   (when (non-blank? suite)
     (switch-suite! suite)
     (reset-progress!))
-  (admin-page "Suite switched"))
+  (response/redirect "/admin"))
 
 (defn do-reset-scores []
   (reset-scores!)
