@@ -1,6 +1,6 @@
 (ns httpc.test.suite
   (:use [httpc.player]
-	[httpc.test common rest]
+	[httpc.test common simple rest]
 	:reload-all)
   (:gen-class))
 
@@ -9,6 +9,9 @@
 
 (defn all-suites []
   (deref *suites*))
+
+(defn all-test-in-suite []
+  (:tests (deref *suite*)))
 
 (defn switch-suite! [s]
   (let [suite (first (filter #(= (:name %) s) (all-suites)))]
@@ -21,7 +24,7 @@
   (let [test-fn (rand-nth (:tests (deref *suite*)))]
    (setup-test test-fn p)))
 
-; rename to select tests?
+; Rename to select tests?
 (defn create-tests []
   "Create test instances for each active player. The test instance
    contains the question to send to player as well as a closure to
@@ -37,8 +40,9 @@
 					  test-arithmetic-with-params
 					  test-largest-number
 					  test-user-agent
+					  test-referer
 					  test-restful-resource])
-		    (make-suite "Dev" [test-restful-resource])])
+		    (make-suite "Dev" [test-cookies])])
   (switch-suite! "Dev"))
 
 (init)

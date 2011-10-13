@@ -90,7 +90,9 @@
 (defn scores-json-fragment []
   (let [body (reduce (fn [r p] (conj r {:id (:id p)
 					:name (:name p)
-					:score (:score p)}))
+					:score (:score p)
+					:completed (count (:completed-tests p))
+					:total (count (all-test-in-suite))}))
 		     [] (players-by-score))]
     (-> (response/response (json-str body))
 	(response/content-type "application/json"))))
@@ -235,13 +237,15 @@
        [:th "Name"]
        [:th "Color"]
        [:th {:width "50%"} "Score"]
+       [:th "Progress"]
        [:th "Action"]]]
      [:tbody#scores
       ]]]))
 
 (defn do-switch-suite [suite]
   (when (non-blank? suite)
-    (switch-suite! suite))
+    (switch-suite! suite)
+    (reset-progress!))
   (admin-page "Suite switched"))
 
 (defn do-reset-scores []

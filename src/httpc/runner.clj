@@ -7,6 +7,7 @@
 
 (def *timeout* 5000)
 (def *test-interval* 5000)
+(def *terminate* (atom false))
 
 (defn to-response [r]
   {:headers (c/headers r)
@@ -21,14 +22,28 @@
   (let [delta (- (System/currentTimeMillis) start)]
     (> delta *timeout*)))
 
+(defn terminate-poller! []
+  (reset! *terminate* true))
+
+(defn- terminate? []
+  @*terminate*)
+
+(defn- concatenate-url [prefix suffix]
+  (if (and suffix
+	   (.endsWith prefix "/")
+	   (.startsWith suffix "/"))
+    (str prefix (subs suffix 1))
+    (str prefix suffix)))
+
 (defn- fire-request [client test]
   (let [r (:request test)
+	url (concatenate-url (get-in test [:player :url]) (:url (:request test)))
 	method (get {:get c/GET :put c/PUT
 		     :post c/POST :delete c/DELETE
 		     :head c/HEAD} (:method r) c/GET)
 	headers (merge {"User-Agent" "RESTful Competition/1.0"} (:headers r))]
     {:test test
-     :response (method client (:url r)
+     :response (method client url
 		       :query (:query r) :headers headers :body (:body r)
 		       :timeout *timeout*)}))
 
@@ -54,7 +69,6 @@
 (defn test-thread-main []
   (loop []
     (let [start (start-timestamp)]
-	
       (try
 	(test-loop!)
 	(catch Exception e
@@ -62,4 +76,5 @@
       (let [delay (- *test-interval* (- (System/currentTimeMillis) start))]
 	(when (pos? delay)
 	  (Thread/sleep delay)))
-      (recur))))
+      (when (not (terminate?))
+	(recur)))))

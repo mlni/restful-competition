@@ -1,29 +1,22 @@
 (ns httpc.test.common
-  (:use [httpc.player]
-	[clojure.contrib.str-utils :only [str-join]])
+  (:use [httpc.player])
   (:gen-class))
 
 (defn make-test [player request expectation & {:as kv-pairs}]
-  (merge kv-pairs
-	 {:player player
-	  :request request
-	  :expect expectation}))
+  (merge {:final true}
+	 (merge kv-pairs
+		{:player player
+		 :request request
+		 :expect expectation})))
 
-(defn- concatenate-url [prefix suffix]
-  (if (and suffix
-	   (.endsWith prefix "/")
-	   (.startsWith suffix "/"))
-    (str prefix (subs suffix 1))
-    (str prefix suffix)))
-
-(defn to-question [player & {:keys [suffix params headers method body]}]
-  {:url (concatenate-url (:url player) suffix)
+(defn to-question [& {:keys [suffix params headers method body]}]
+  {:url suffix
    :query params
    :headers headers
    :method method
    :body body})
 
-(defn- function-name [f]
+(defn function-name [f]
   (str (:name (meta f))))
 
 (defn- content-equals? [content expected]
@@ -63,60 +56,6 @@
 		   (respond-correct)
 		   (respond-fail)))))
 
-(defn- random-int [min max]
-  (+ min (rand-int (- max min))))
-
-(defn- random-ints [n min max]
-  (repeatedly n #(random-int min max)))
-
-(defn test-your-name [p & args]
-  (make-test p
-	     (to-question p :params {:q "What is your name?"})
-	     (assert-content (:name p))))
-
-(defn test-two-number-arithmetic [p & args]
-  "Test arithmetic with two random numbers and a random operation (+, - or *)"
-  (let [[a b] (random-ints 2 1 20)
-	op (rand-nth [+ * -])
-	op-name (function-name op)]
-    (make-test p
-	       (to-question p :params {:q (format "How much is %s %s %s" a op-name b)})
-	       (assert-content (str (op a b))))))
-
-(defn test-arithmetic-with-params [p & args]
-  (let [[x y] (random-ints 2 1 100)
-	[a b] (rand-nth [["a" "b"] ["x" "y"] ["f" "g"] ["i" "j"]])
-	op (rand-nth [+ - *])
-	op-name (function-name op)
-	params {:q (format "How much is %s %s %s" a op-name b)
-		a x
-		b y}
-	a x
-	b y]
-    (make-test p
-	       (to-question p :params params)
-	       (assert-content (op x y)))))
-
-(defn test-largest-number [p & args]
-  (let [ns (random-ints 5 1 1000)
-	q (str "Which of the numbers is largest: " (str-join ", " ns))]
-    (make-test p
-	       (to-question p :params {:q q})
-	       (assert-content (str (apply max ns))))))
-
-(defn test-user-agent [p & args]
-  (let [ua (rand-nth ["Mozilla/5.0 Chrome/15.0.872.0 Safari/535.2"
-		      "Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0"
-		      "Mozilla/5.0 (X11; Linux i686; rv:6.0) Gecko/20100101 Firefox/6.0"
-		      "Mozilla/5.0 (X11; en-US; rv:1.9.2.8) Gecko/20101230 Firefox/3.6.8"
-		      "Googlebot/2.1 (+http://www.googlebot.com/bot.html)"])]
-    (make-test p
-	       (to-question p
-			    :params {:q "What is my user agent"}
-			    :headers {"User-Agent" ua})
-	       (assert-content ua))))
-
-
 (defn setup-test [test-fn player]
   (let [test-name (function-name test-fn)
 	test-state (get-in player [:test-state test-name])
@@ -129,9 +68,13 @@
 (defn assert-response! [test resp]
   "Assert the received response against the expected result."
   (let [result (assert-test test resp)
-	log-entry (make-log-event result)]
+	log-entry (make-log-event result)
+	test-name (:name test)]
     (when (:next-state test)
       (let [ns ((:next-state test) test result resp)]
 	(println "Updating state!" ns)
-	(update-player-attr! (:player test) [:test-state (:name test)] ns)))
+	(set-player-attr! (:player test) [:test-state test-name] ns)))
+    (when (and (= :ok (:status result))
+	       (:final test))
+      (update-player-attr! (:player test) [:completed-tests] #(conj % test-name)))
     (record-event! (:player test) log-entry)))

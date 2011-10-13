@@ -5,12 +5,16 @@
 
 (def *players* (ref {}))
 
-(defn generate-id []
+(defn generate-random-str [len]
   (let [keys "0123456789abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ"]
-    (apply str (map (fn [_] (rand-nth keys)) (range 16)))))
+    (apply str (map (fn [_] (rand-nth keys)) (range len)))))
+
+(defn generate-id []
+  (generate-random-str 16))
 
 (defn make-player [name url]
-  {:name name :url url :log '() :score 0 :id (generate-id)})
+  {:name name :url url :log '() :score 0 :id (generate-id)
+   :completed-tests #{}})
 
 (defn- all-players []
   (-> *players*
@@ -48,6 +52,8 @@
 
 (defn make-log-event [result]
   (let [{status :status msg :msg} result]
+    (when (not (and msg status))
+      (throw IllegalArgumentException (str "Cannot log event, status/message missing: " msg status)))
     {:time (System/currentTimeMillis)
      :status status
      :message (str msg)
@@ -64,11 +70,17 @@
   (doseq [r resps]
     (record-event! (:player r) (make-log-event {:status :timeout :msg "Request timed out"}))))
 
+(defn- set-all-attrs [attr val]
+  (fn [ps]
+    (reduce (fn [r k] (assoc-in r [k attr] val)) ps (keys ps))))
+
 (defn reset-scores! []
   (dosync
-   (let [ps (deref *players*)]
-     (alter *players*
-	    (reduce (fn [r k] (assoc-in r [k :score] 0)) ps (keys ps))))))
+   (alter *players* (set-all-attrs :score 0))))
+
+(defn reset-progress! []
+  (dosync
+   (alter *players* (set-all-attrs :completed-tests #{}))))
 
 (defn save-data! []
   (let [data (binding [*print-dup* true]
@@ -80,10 +92,15 @@
     (dosync
      (alter *players* data))))
 
-(defn update-player-attr! [p path val]
+(defn set-player-attr! [p path val]
   (let [key (concat [(:id p)] path)]
     (dosync
      (alter *players* assoc-in key val))))
+
+(defn update-player-attr! [p path f]
+  (let [key (concat [(:id p)] path)]
+    (dosync
+     (alter *players* update-in key f))))
 
 (defn- init []
   (dosync

@@ -9,8 +9,9 @@
     (on-success r (respond-correct))))
 
 (defn expect-content [session]
-  (println "expect-content " (:content session))
   (assert-content (:content session)))
+
+; todo: make resource name randomer
 
 (defn expect-not-found [_]
   (fn [r]
@@ -20,19 +21,16 @@
 
 (defn put-resource [p]
   (let [random-content (generate-id)]
-    (to-question p
-		 :method :put
+    (to-question :method :put
 		 :suffix "/resource/bar"
 		 :body random-content)))
 
 (defn get-resource [p]
-  (to-question p
-	       :method :get
+  (to-question :method :get
 	       :suffix "/resource/bar"))
 
 (defn delete-resource [p]
-  (to-question p
-	       :method :delete
+  (to-question :method :delete
 	       :suffix "/resource/bar"))
 
 (defn- update-state-on-success [n]
@@ -42,6 +40,9 @@
 	; save the content used in PUT for later asserts
 	(assoc n :content (:body (:request test)))
 	n))))
+
+(defn- is-last-state? [sm s]
+  (= s (first (last sm))))
 
 (def *state-machine*
      {nil      [put-resource expect-success :saved]
@@ -57,4 +58,5 @@
     (make-test p
 	       (test-fn p)
 	       (assert-fn session)
-	       :next-state (update-state-on-success next))))
+	       :next-state (update-state-on-success next)
+	       :final (is-last-state? *state-machine* current-state))))
