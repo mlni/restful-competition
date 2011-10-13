@@ -1,19 +1,47 @@
 import sys, cgi, re, operator
 from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 
+REST_STATE = {}
+
 class MyServer(BaseHTTPRequestHandler):
     def do_GET(self):
         # import time
         # time.sleep(10)
-        params = cgi.parse_qs( self.path.split("?")[1] )
+        params = {}
+        if self.path.find("?") != -1:
+            params = cgi.parse_qs( self.path.split("?")[1] )
         print params
         print self.headers
+        if "q" in params:
+            self.send_response(200, 'OK')
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            self.wfile.write( solve(params, self.headers) )
+        else:
+            if self.path in REST_STATE:
+                self.send_response(200, 'OK')
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
+                self.wfile.write( REST_STATE[self.path] )
+            else:
+                self.send_response(404, 'Not Found')
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
+                self.wfile.write("Not Found")
+
+    def do_DELETE(self):
         self.send_response(200, 'OK')
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-        self.wfile.write( solve(params) )
-
+        del REST_STATE[self.path]
+            
     def do_PUT(self):
+        length = int(self.headers.getheader('content-length'))
+        data = self.rfile.read(length)
+        
+        REST_STATE[self.path] = data
+        print "Got", data
+        
         self.send_response(200, 'OK')
         self.send_header('Content-type', 'text/html')
         self.end_headers()
@@ -40,7 +68,14 @@ def arithm(q):
     m = re.search("is ([0-9]+) ([\+*-]) ([0-9]+)", q)
     return ops[m.group(2)](int(m.group(1)), int(m.group(3)))
 
-def solve(params):
+def referer(h):
+    ref = h.get("Referer")
+    return ref
+
+def solve(params, headers):
+    if "q" not in params:
+        return NAME
+    
     q = params["q"][0]
     if q.find("largest") != -1:
         # Which of the numbers is largest: 841, 973, 279, 146, 923
@@ -49,6 +84,8 @@ def solve(params):
         return arithm_params(q, params)
     elif re.search("[0-9]+ [\+*-] [0-9]+", q):
         return arithm(q)
+    elif q.find("Which page am I coming from") != -1:
+        return referer(headers)
     return NAME
 
 if __name__ == "__main__":
