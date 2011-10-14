@@ -82,6 +82,12 @@ def sid():
     SESSION_ID+=1
     return str(SESSION_ID)
 
+def sessioncookie(h):
+    if h.get("Cookie"):
+        return h.get("Cookie").split(";")[0].split("=")[1]
+    return None
+
+
 def solve(params, headers):
     if "q" not in params:
         return NAME
@@ -93,9 +99,9 @@ def solve(params, headers):
     if q.find("largest") != -1:
         # Which of the numbers is largest: 841, 973, 279, 146, 923
         result = largest_number(q)
-    elif re.search("[a-z] [\+*-] [a-z]", q):
+    elif re.search("How much is [a-z] [\+*-] [a-z]", q):
         result = arithm_params(q, params)
-    elif re.search("[0-9]+ [\+*-] [0-9]+", q):
+    elif re.search("How much is [0-9]+ [\+*-] [0-9]+", q):
         result = arithm(q)
     elif q.find("Which page am I coming from") != -1:
         result = referer(headers)
@@ -104,14 +110,37 @@ def solve(params, headers):
         s = sid()
         SESSIONS[s] = name
         out.append(["Set-Cookie", "SID=%s; domain=localhost" % s])
-        if random.random() > 0.5:
-            out.append(["Set-Cookie", "FOO=13; domain=localhost"])
         result = name
     elif q.find("What is my name") != -1:
-        s = headers.get("Cookie").split(";")[0].split("=")[1]
+        s = sessioncookie(headers)
         print "Got sid", s
         name = SESSIONS[s]
         result = name
+    elif re.search("Let \w+ be \w+", q):
+        name, value = re.search("Let (\w+) be (\w+)\.", q).groups()
+        s = sessioncookie(headers)
+        if not s:
+            s = sid()
+        print "Got sid", s
+        if s in SESSIONS:
+            vals = SESSIONS[s]
+        else:
+            vals = {}
+        vals[name] = int(value)
+        SESSIONS[s] = vals
+        print "Session: ", vals
+        
+        out.append(["Set-Cookie", "SID=%s; domain=localhost" % s])
+        result = value
+    elif q.find("Remember how much is") != -1:
+        n1, op, n2 = re.search("Remember how much is (\w+) ([+*-]) (\w+)", q).groups()
+        s = sessioncookie(headers)
+        print "Got sid", s
+        vals = SESSIONS[s]
+        print "Session: ", vals
+        ops = { "+": operator.add, "-": operator.sub, "*": operator.mul }
+        result = ops[op](vals[n1], vals[n2])
+        
     return (out, result)
 
 if __name__ == "__main__":

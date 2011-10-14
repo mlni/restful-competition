@@ -2,12 +2,6 @@
   (:use httpc.test.common
 	[clojure.contrib.str-utils :only [str-join]]))
 
-(defn- random-int [min max]
-  (+ min (rand-int (- max min))))
-
-(defn- random-ints [n min max]
-  (repeatedly n #(random-int min max)))
-
 (defn test-your-name [p & args]
   (make-test p
 	     (to-question :params {:q "What is your name?"})

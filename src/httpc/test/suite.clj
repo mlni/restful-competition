@@ -42,8 +42,10 @@
 					  test-user-agent
 					  test-referer
 					  test-restful-resource
-					  test-cookies])
-		    (make-suite "Dev" [test-my-name-session])])
+					  test-cookies
+					  test-my-name-session])
+		    (make-suite "Dev" [test-my-name-session
+				       test-arithmetic-with-session])])
   (switch-suite! "Dev"))
 
 (init)

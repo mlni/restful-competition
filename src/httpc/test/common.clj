@@ -1,5 +1,6 @@
 (ns httpc.test.common
-  (:use [httpc.player])
+  (:use [httpc.player]
+	clojure.pprint)
   (:gen-class))
 
 (defn make-test [player request expectation & {:as kv-pairs}]
@@ -18,6 +19,12 @@
 
 (defn function-name [f]
   (str (:name (meta f))))
+
+(defn random-int [min max]
+  (+ min (rand-int (- max min))))
+
+(defn random-ints [n min max]
+  (repeatedly n #(random-int min max)))
 
 (defn- content-equals? [content expected]
   (= (.toLowerCase (str expected)) (.. (str content) toLowerCase trim)))
@@ -59,7 +66,7 @@
 (defn setup-test [test-fn player]
   (let [test-name (function-name test-fn)
 	test-state (get-in player [:test-state test-name])
-	testcase (test-fn player :state test-state)]
+	testcase (test-fn player :state test-state :test-name test-name)]
     (assoc testcase :name test-name)))
 
 (defn assert-test [test resp]
@@ -72,8 +79,9 @@
 	test-name (:name test)]
     (when (:next-state test)
       (let [ns ((:next-state test) test result resp)]
-	(println "Updating state!" ns)
-	(set-player-attr! (:player test) [:test-state test-name] ns)))
+	(set-player-attr! (:player test) [:test-state test-name] ns)
+	(pprint (:test-state (get-in @*players* [(get-in test [:player :id])])))
+	(flush))
     (when (and (= :ok (:status result))
 	       (:final test))
       (update-player-attr! (:player test) [:completed-tests]
