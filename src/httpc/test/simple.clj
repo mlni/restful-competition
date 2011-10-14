@@ -17,19 +17,15 @@
 	       (to-question :params {:q (format "How much is %s %s %s" a op-name b)})
 	       (assert-content (str (op a b))))))
 
+
 (defn test-arithmetic-with-params [p & args]
-  (let [[x y] (random-ints 2 1 100)
-	[a b] (rand-nth [["a" "b"] ["x" "y"] ["f" "g"] ["i" "j"]])
-	op (rand-nth [+ - *])
-	op-name (function-name op)
-	params {:q (format "How much is %s %s %s" a op-name b)
+  (let [{:keys [x y a b op result]} (create-arithmetic-testcase)
+	params {:q (format "How much is %s %s %s" a op b)
 		a x
-		b y}
-	a x
-	b y]
+		b y}]
     (make-test p
 	       (to-question :params params)
-	       (assert-content (op x y)))))
+	       (assert-content result))))
 
 (defn test-largest-number [p & args]
   (let [ns (random-ints 5 1 1000)
@@ -61,12 +57,9 @@
 	       (assert-content rnd-ref))))
 
 (defn test-cookies [p & args]
-  (let [[x y] (random-ints 2 1 100)
-	[a b] (rand-nth [["a" "b"] ["x" "y"] ["f" "g"] ["i" "j"]])
-	op (rand-nth [+ - *])
-	op-name (function-name op)
-	params {:q (format "How much is %s %s %s" a op-name b)}]
+  (let [{:keys [x y a b op result]} (create-arithmetic-testcase)
+	params {:q (format "How much is %s %s %s" a op b)}]
     (make-test p
 	       (to-question :params params
 			    :headers { "Cookie" (format "%s=%s; %s=%s" a x b y) })
-	       (assert-content (op x y)))))
+	       (assert-content result))))

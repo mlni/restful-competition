@@ -26,6 +26,14 @@
 (defn random-ints [n min max]
   (repeatedly n #(random-int min max)))
 
+(defn create-arithmetic-testcase []
+  (let [[x y] (random-ints 2 1 100)
+	[a b] (rand-nth [["a" "b"] ["x" "y"] ["f" "g"] ["i" "j"]])
+	op (rand-nth [+ - *])
+	op-name (function-name op)]
+    {:x x :y y :a a :b b
+     :op op-name :result (op x y)}))
+
 (defn- content-equals? [content expected]
   (= (.toLowerCase (str expected)) (.. (str content) toLowerCase trim)))
 
@@ -81,7 +89,7 @@
       (let [ns ((:next-state test) test result resp)]
 	(set-player-attr! (:player test) [:test-state test-name] ns)
 	(pprint (:test-state (get-in @*players* [(get-in test [:player :id])])))
-	(flush))
+	(flush)))
     (when (and (= :ok (:status result))
 	       (:final test))
       (update-player-attr! (:player test) [:completed-tests]
