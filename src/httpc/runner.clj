@@ -11,7 +11,7 @@
 
 (defn to-response [r]
   {:headers (c/headers r)
-   :content (c/string r)
+   :content (c/ng r)
    :error (c/error r)
    :status (c/status r)})
 
@@ -45,7 +45,7 @@
     {:test test
      :response (method client url
 		       :query (:query r) :headers headers :body (:body r)
-		       :timeout *timeout*)}))
+		       :timeout (+ 1000 *timeout*))}))
 
 (def split-by-pred (juxt filter remove))
 

@@ -2,8 +2,9 @@
   (:gen-class))
 
 (def *max-log-items* 20)
-
+(def *error-delay* (* 20 1000))
 (def *players* (ref {}))
+
 
 (defn generate-random-str [len]
   (let [keys "0123456789abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ"]
@@ -45,7 +46,12 @@
 	:timeout -10} status 0))
 
 (defn active-players []
-  (all-players))
+  (let [now (System/currentTimeMillis)]
+    (filter (fn [player]
+	      (let [next (:next-request player)]
+		(or (nil? next)
+		    (> now next))))
+	    (all-players))))
 
 (defn players-by-score []
   (reverse (sort-by :score (all-players))))
@@ -59,12 +65,17 @@
      :message (str msg)
      :score (score status)}))
 
+(defn- error-timeout []
+  (+ (System/currentTimeMillis) *error-delay*))
+
 (defn record-event! [player evt]
   (when (@*players* (:id player))
    (dosync
     (alter *players* update-in [(:id player) :score] + (:score evt))
     (alter *players* update-in [(:id player) :log] #(take *max-log-items*
-							  (conj % evt))))))
+							  (conj % evt)))
+    (when (#{:timeout :error} (:status evt))
+      (alter *players* assoc-in [(:id player) :next-request] (error-timeout))))))
 
 (defn record-timeout! [resps]
   (doseq [r resps]
