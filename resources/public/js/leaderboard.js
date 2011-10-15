@@ -35,7 +35,7 @@
 	var completed = (player.completed == player.total);
         body.append(
           $("<tr/>")
-            .append("<td>" + player.name + "</td>")
+            .append("<td>" + player.name + " " + player.url + "</td>")
             .append("<td><div style='width: 20px; background-color: " + colour + "'>&nbsp;</div></td>")
             .append("<td>" + player.score + "</td>")
             .append("<td>" + player.completed + " / " + player.total +
