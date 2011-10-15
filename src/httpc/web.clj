@@ -104,6 +104,7 @@
 (defn scores-json-fragment []
   (let [body (reduce (fn [r p] (conj r {:id (:id p)
 					:name (:name p)
+					:url (:url p)
 					:score (:score p)
 					:completed (count (:completed-tests p))
 					:total (count (all-test-in-suite))}))
@@ -248,9 +249,9 @@
     [:table.zebra-striped
      [:thead
       [:tr
-       [:th "Name"]
+       [:th {:width "50%"} "Name"]
        [:th "Color"]
-       [:th {:width "50%"} "Score"]
+       [:th "Score"]
        [:th "Progress"]
        [:th "Action"]]]
      [:tbody#scores

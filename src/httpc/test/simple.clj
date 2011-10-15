@@ -7,7 +7,6 @@
 	     (to-question :params {:q "What is your name?"})
 	     (assert-content (:name p))))
 
-
 (defn test-two-number-arithmetic [p & args]
   "Test arithmetic with two random numbers and a random operation (+, - or *)"
   (let [[a b] (random-ints 2 1 20)
@@ -16,7 +15,6 @@
     (make-test p
 	       (to-question :params {:q (format "How much is %s %s %s" a op-name b)})
 	       (assert-content (str (op a b))))))
-
 
 (defn test-arithmetic-with-params [p & args]
   (let [{:keys [x y a b op result]} (create-arithmetic-testcase)

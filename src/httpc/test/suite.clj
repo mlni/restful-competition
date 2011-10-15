@@ -1,11 +1,11 @@
 (ns httpc.test.suite
   (:use [httpc.player]
-	[httpc.test common simple rest session]
+	[httpc.test common simple rest stateful]
 	:reload-all)
   (:gen-class))
 
-(def *suites* (atom []))
-(def *suite* (atom nil)) ; fixme: set initial value
+(def *suites*)
+(def *suite*)
 
 (defn all-suites []
   (deref *suites*))
@@ -34,18 +34,18 @@
      (random-test player))))
 
 
-(defn- init []
-  (reset! *suites* [(make-suite "Trivial" [test-your-name])
-		    (make-suite "Simple" [test-two-number-arithmetic
-					  test-arithmetic-with-params
-					  test-largest-number
-					  test-user-agent
-					  test-referer
-					  test-restful-resource
-					  test-cookies
-					  test-my-name-session])
-		    (make-suite "Dev" [test-my-name-session
-				       test-arithmetic-with-session])])
-  (switch-suite! "Dev"))
+(defn- init-suites []
+  [(make-suite "Trivial" [test-your-name])
+   (make-suite "Simple" [test-two-number-arithmetic
+			 test-arithmetic-with-params
+			 test-largest-number
+			 test-user-agent
+			 test-referer
+			 test-restful-resource
+			 test-cookies
+			 test-my-name-session])
+   (make-suite "Dev" [test-my-name-session
+		      test-arithmetic-with-session])])
 
-(init)
+(def *suites* (atom (init-suites)))
+(def *suite* (atom (first @*suites*)))
