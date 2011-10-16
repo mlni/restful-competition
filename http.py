@@ -5,8 +5,8 @@ REST_STATE = {}
 
 class MyServer(BaseHTTPRequestHandler):
     def do_GET(self):
-        # import time
-        # time.sleep(10)
+        global REST_STATE
+
         params = {}
         if self.path.find("?") != -1:
             params = cgi.parse_qs( self.path.split("?")[1] )
@@ -33,17 +33,19 @@ class MyServer(BaseHTTPRequestHandler):
                 self.wfile.write("Not Found")
 
     def do_DELETE(self):
+        global REST_STATE
         self.send_response(200, 'OK')
         self.send_header('Content-type', 'text/html')
         self.end_headers()
         del REST_STATE[self.path]
             
     def do_PUT(self):
+        global REST_STATE
         length = int(self.headers.getheader('content-length'))
         data = self.rfile.read(length)
         
         REST_STATE[self.path] = data
-        print "Got", data
+        print "Got", data, self.path
         
         self.send_response(200, 'OK')
         self.send_header('Content-type', 'text/html')
