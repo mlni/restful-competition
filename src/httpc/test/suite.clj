@@ -35,15 +35,15 @@
 
 
 (defn- init-suites []
-  [(make-suite "Trivial" [test-your-name])
-   (make-suite "Simple" [test-two-number-arithmetic
-			 test-arithmetic-with-params
-			 test-largest-number
-			 test-user-agent
-			 test-referer
-			 test-restful-resource
-			 test-cookies
-			 test-my-name-session])
+  [(make-suite "Warmup" [test-your-name])
+   (make-suite "Arithmetic" [test-two-number-arithmetic
+			     test-largest-number])
+   (make-suite "Basic HTTP" [test-user-agent
+			     test-referer
+			     test-cookies])
+   (make-suite "Rest" [test-restful-resource])
+   (make-suite "Sessions" [test-my-name-session
+			   test-arithmetic-with-session])
    (make-suite "Dev" [test-my-name-session
 		      test-arithmetic-with-session])])
 

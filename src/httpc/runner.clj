@@ -11,7 +11,7 @@
 
 (defn to-response [r]
   {:headers (c/headers r)
-   :content (c/ng r)
+   :content (c/string r)
    :error (c/error r)
    :status (c/status r)})
 

@@ -13,12 +13,18 @@
   (contains? (:headers resp) :set-cookie))
 
 (defn- format-cookie [cookies]
-  ; http client library returns either a string or a vector of cookies
+; http client library returns either a string or a vector of cookies
+  (str-join "; "
+	    (map (fn [[k v]] (format "%s=%s" k v))
+		 cookies)))
+
+(defn- parse-cookie-header [cookies]
   (let [cookies (if (sequential? cookies) cookies [cookies])]
-    (str-join "; "
-	      (map (fn [p] (let [ps (.split p ";")]
-			     (first ps)))
-		   cookies))))
+    (reduce (fn [r [k v]] (assoc r k v))
+	    {}
+	    (map (fn [p] (let [name-value (first (.split p ";"))]
+			   (take 2 (.split name-value "="))))
+		 cookies))))
 
 (defn- calculate-next-state [next sessions sid]
   (if (nil? next)
@@ -28,12 +34,14 @@
       (if (= :ok (:status result))
 	(if (contains-cookie? resp)
 	  (-> sessions
-	      (assoc-in [sid :cookies] (format-cookie (:set-cookie (:headers resp))))
+	      (update-in [sid :cookies] merge (parse-cookie-header (:set-cookie (:headers resp))))
 	      (assoc-in [sid :state] next))
 	  (assoc-in sessions [sid :state] next))
 	(dissoc-in sessions [sid])))))
 
 (defn- construct-statemachine [fns]
+  "Given a list of functions, generate a mapping of state-names to [function next-state] pairs.
+   The first state is always called nil and the last transition is to nil state."
   (let [keys (partition 2 1 (concat [nil]
 				    (range (dec (count fns)))
 				    [nil]))]
@@ -54,7 +62,7 @@
    (make-test p
 	      (to-question :params {:q (:question session)}
 			   :headers (if (:cookies session)
-				      {"Cookie" (:cookies session)}
+				      {"Cookie" (format-cookie (:cookies session))}
 				      nil))
 	      (assert-content (:expected session))
 	      :next-state (calculate-next-state next-state

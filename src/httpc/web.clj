@@ -183,7 +183,7 @@
 (defn player-page [id]
   (let [p (player-by-id id)] ; todo: redirect to root if player not found
     (layout
-     (heading1 "Team " (:name p))
+     (heading1 "Team " (:name p) "&nbsp;" [:small (:url p)])
      [:div#scores
       (player-scores id)]
      (javascript-tag
