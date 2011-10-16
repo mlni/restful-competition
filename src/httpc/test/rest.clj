@@ -47,7 +47,7 @@
 
 
 (defn put-resource [s]
-  (let [random-content (generate-random-str 64)
+  (let [random-content (generate-random-str 100)
 	resource-name (rand-nth ["foo" "bar" "baz" "quux"])
 	suffix (str "/resource/" resource-name)]
     (merge s
@@ -73,4 +73,37 @@
 		  [get-resource expect-content]
 		  [delete-resource expect-success]
 		  [get-resource expect-not-found]]]
+    (multistep-testcase p session workflow)))
+
+
+
+; test Range header
+
+(defn put-partial-resource [s]
+  (let [random-content (generate-random-str 100)
+	resource-name (rand-nth ["foo1" "foo2" "foo3"])
+	suffix (str "/resource/" resource-name)]
+    (merge s
+	   {:suffix suffix
+	    :content random-content
+	    :question (to-question :method :put
+				   :suffix suffix
+				   :body random-content)})))
+
+(defn get-partial-resource [s]
+  (let [range (random-int 30 50)]
+    (merge s
+	   {:range range
+	    :question (to-question :method :get
+				   :suffix (:suffix s)
+				   :headers {"Range" (str "bytes=0-" range)})})))
+
+; add error message indicating too long content
+(defn expect-partial-content [session]
+  (let [content (subs (:content session) 0 (:range session))]
+   (assert-content content)))
+
+(defn test-range-header [p & {session :state}]
+  (let [workflow [[put-partial-resource expect-success]
+		  [get-partial-resource expect-partial-content]]]
     (multistep-testcase p session workflow)))

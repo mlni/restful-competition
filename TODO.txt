@@ -3,6 +3,7 @@
 * add proper logging
 * add per test scores
 * track number of questions asked/correctly answered per player per suite
+* refactor rest tests and session tests to use common core
 
 * deactivation of passive users?
 * support redirects?
