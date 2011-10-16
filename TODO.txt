@@ -1,9 +1,11 @@
-* deactivation of passive users
+* add the rest of restful tests
+* make restful resource random
 * add proper logging
 * add per test scores
-* per user request delays
-* support redirects?
 * track number of questions asked/correctly answered per player per suite
+
+* deactivation of passive users?
+* support redirects?
 
 
 exercises:
@@ -33,3 +35,5 @@ rest
 * replace players atom with ref as it is modified from multiple threads
 * add session test
 * show whether the user has answered all tests in the current suite
+* refactor state machines to be implicit
+* per user request delays
