@@ -88,11 +88,6 @@
 		       (respond-correct)
 		       (respond-fail)))))))
 
-(defn test-range-header [p & {session :state}]
-  (let [workflow [[(put-resource 2) expect-success]
-		  ]]
-    (multistep-testcase p session workflow)))
-
 (defn test-restful-resource [p & {session :state}]
   "Test PUT/GET/DELETE cycle of a resource"
   (let [workflow (concat [[(put-resource 1) expect-success]

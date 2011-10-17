@@ -46,7 +46,7 @@
    (make-suite "Rest" [test-restful-resource])
    (make-suite "Sessions" [test-my-name-session
 			   test-arithmetic-with-session])
-   (make-suite "Dev" [test-range-header])])
+   (make-suite "Dev" [test-nth-fib])])
 
 (def *suites* (atom (init-suites)))
 (def *suite* (atom (first @*suites*)))
