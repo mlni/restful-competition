@@ -26,7 +26,7 @@ class MyServer(BaseHTTPRequestHandler):
                 self.send_header('Content-type', 'text/html')
                 self.end_headers()
 
-                if self.headers.get("Range") != -1:
+                if self.headers.get("Range"):
                     range_h = self.headers.get("Range")
                     print "Range header: %s" % range_h 
                     st, end = re.search("bytes=([0-9]+)-([0-9]+)", range_h).groups()

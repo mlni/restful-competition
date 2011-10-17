@@ -8,7 +8,7 @@
 (defn- question [fmt & args]
   (apply format (concat [fmt] args)))
 
-(defn test-my-name-session [p & {sessions :state testname :test-name}]
+(defn test-my-name-session [p & {sessions :state}]
   (letfn [(init [s]
 		(let [name (rand-nth ["Matti" "Bill" "Bob" "John" "Steve"
 				      "Donald" "Dennis" "Rob" "Edsger" "Martin"])]
@@ -17,8 +17,7 @@
 		      (assoc :question (question "My name is %s. What is my name" name)))))
 	  (resend [s]
 		  (assoc s :question (question "What is my name")))]
-   (let [correct-answers (get-in p [:completed-tests testname] 0)
-	 parallel-sessions (if (> correct-answers 5) 3 1)
+   (let [parallel-sessions (if (> (correct-answers) 5) 3 1)
 	 workflow [init
 		   resend
 		   resend]]
@@ -27,7 +26,7 @@
 
 ; test arithmetics with sessions
 
-(defn test-arithmetic-with-session [p & {sessions :state testname :test-name}]
+(defn test-arithmetic-with-session [p & {sessions :state}]
   (letfn [(init [s]
 		(let [{:keys [x y a b op result]} (create-arithmetic-testcase)]
 		  (merge s {:param1 a :param2 b :val1 x :val2 y :op-name op :result result
@@ -44,7 +43,7 @@
 			  (question "Remember how much is %s %s %s" param1 op-name param2))
 			(assoc :expected result))))]
     
-   (let [corrects (get-in p [:completed-tests testname] 0)
+   (let [corrects (correct-answers)
 	 num-sessions (if (>= corrects 5) 3 1)
 	 workflow [init
 		   arg2

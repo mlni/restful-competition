@@ -1,9 +1,10 @@
 * add the rest of restful tests
-* make restful resource random
 * add proper logging
 * add per test scores
 * track number of questions asked/correctly answered per player per suite
 * refactor rest tests and session tests to use common core
+* add incremental test addition within suite
+* make score calculation take number of correct answers into account
 
 * deactivation of passive users?
 * support redirects?
@@ -38,3 +39,23 @@ rest
 * show whether the user has answered all tests in the current suite
 * refactor state machines to be implicit
 * per user request delays
+* make Range and Fibo tests incrementally harder
+* make restful resource random
+
+
+
+Suites:
+1. Warmup
+  - What is your name
+2. Simple tests
+- Arithmetics
+- Which number is the largest
+- What is the nth number in Fibonacci sequence
+- How much is a [+*-] b, a & b in request params
+3. Basic HTTP
+- User Agent test
+- Referer
+- How much is a + b, a and b in cookies
+4. Stateful test (kui jõuab nii kaugele)
+- Restful crud: PUT/GET/DELETE/GET /resource/foo1
+- Restful crud with Range headers

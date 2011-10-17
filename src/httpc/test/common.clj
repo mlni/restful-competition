@@ -76,28 +76,39 @@
 		   (respond-correct)
 		   (respond-fail)))))
 
+(def *correct-answers*)
+(def *test-name*)
+
+(defn correct-answers []
+  *correct-answers*)
+
+(defn test-name []
+  *test-name*)
+
 (defn setup-test [test-fn player]
   (let [test-name (function-name test-fn)
-	test-state (get-in player [:test-state test-name])
-	testcase (test-fn player :state test-state :test-name test-name)]
-    (assoc testcase :name test-name)))
+	test-state (get-in player [:test-state test-name])]
+    (binding [*test-name* test-name
+	      *correct-answers* (get-in player [:completed-tests test-name] 0)]
+     (assoc (test-fn player :state test-state :test-name test-name) :name test-name))))
 
 (defn assert-test [test resp]
   ((:expect test) resp))
 
 (defn assert-response! [test resp]
   "Assert the received response against the expected result."
-  (let [result (assert-test test resp)
-	log-entry (make-log-event result)
-	test-name (:name test)]
-    (when (:next-state test)
-      (let [ns ((:next-state test) test result resp)]
-	(set-player-attr! (:player test) [:test-state test-name] ns)
-	(pprint (:test-state (get-in @*players* [(get-in test [:player :id])])))
-	(flush)))
-    (when (and (= :ok (:status result))
-	       (:final test))
-      (update-player-attr! (:player test) [:completed-tests]
-			   #(update-in % [test-name]
-				       (fn [v] (inc (or v 0))))))
-    (record-event! (:player test) log-entry)))
+  (binding [*test-name* (:name test)
+	    *correct-answers* (get-in test [:player :completed-tests (:name test)] 0)]
+   (let [result (assert-test test resp)
+	 log-entry (make-log-event result)]
+     (when (:next-state test)
+       (let [ns ((:next-state test) test result resp)]
+	 (set-player-attr! (:player test) [:test-state (test-name)] ns)
+	 (pprint (:test-state (get-in @*players* [(get-in test [:player :id])])))
+	 (flush)))
+     (when (and (= :ok (:status result))
+		(:final test))
+       (update-player-attr! (:player test) [:completed-tests]
+			    #(update-in % [(test-name)]
+					(fn [v] (inc (or v 0))))))
+     (record-event! (:player test) log-entry))))

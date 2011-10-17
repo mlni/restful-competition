@@ -69,17 +69,7 @@
     :question (to-question :method :delete
 			   :suffix (:suffix s))))
 
-(defn test-restful-resource [p & {session :state}]
-  "Test PUT/GET/DELETE cycle of a resource"
-  (let [workflow [[(put-resource 1) expect-success]
-		  [get-resource expect-content]
-		  [delete-resource expect-success]
-		  [get-resource expect-not-found]]]
-    (multistep-testcase p session workflow)))
-
-
 ; test Range header
-
 (defn get-partial-resource [s]
   (let [range (random-int 30 50)]
     (merge s
@@ -100,5 +90,16 @@
 
 (defn test-range-header [p & {session :state}]
   (let [workflow [[(put-resource 2) expect-success]
-		  [get-partial-resource expect-partial-content]]]
+		  ]]
+    (multistep-testcase p session workflow)))
+
+(defn test-restful-resource [p & {session :state}]
+  "Test PUT/GET/DELETE cycle of a resource"
+  (let [workflow (concat [[(put-resource 1) expect-success]
+			  [get-resource expect-content]]
+			 (when (>= (correct-answers) 5)
+			   [[get-partial-resource expect-partial-content]])
+			 [[delete-resource expect-success]
+			  [get-resource expect-not-found]])]
+    (println "Correct: " (correct-answers))
     (multistep-testcase p session workflow)))
