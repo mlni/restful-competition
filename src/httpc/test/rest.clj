@@ -25,7 +25,7 @@
 	next (-> session test-fn (assoc :state next-state))]
     (make-test p
 	       (:question next)
-	       (assert-fn session)
+	       (assert-fn next)
 	       :next-state (update-state-on-success next)
 	       :final (nil? next-state))))
 
@@ -46,16 +46,18 @@
 	  :else (respond-fail "Server did not respond with 404"))))
 
 
-(defn put-resource [s]
-  (let [random-content (generate-random-str 100)
-	resource-name (rand-nth ["foo" "bar" "baz" "quux"])
-	suffix (str "/resource/" resource-name)]
-    (merge s
-	   {:suffix suffix
-	    :content random-content
-	    :question (to-question :method :put
-				   :suffix suffix
-				   :body random-content)})))
+(defn put-resource [start-number]
+  (fn [s]
+    (let [random-content (generate-random-str 100)
+	  resources (map #(str "foo" %1) (range start-number 21 2))
+	  resource-name (rand-nth resources)
+	  suffix (str "/resource/" resource-name)]
+      (merge s
+	     {:suffix suffix
+	      :content random-content
+	      :question (to-question :method :put
+				     :suffix suffix
+				     :body random-content)}))))
 
 (defn get-resource [s]
   (assoc s
@@ -69,26 +71,14 @@
 
 (defn test-restful-resource [p & {session :state}]
   "Test PUT/GET/DELETE cycle of a resource"
-  (let [workflow [[put-resource expect-success]
+  (let [workflow [[(put-resource 1) expect-success]
 		  [get-resource expect-content]
 		  [delete-resource expect-success]
 		  [get-resource expect-not-found]]]
     (multistep-testcase p session workflow)))
 
 
-
 ; test Range header
-
-(defn put-partial-resource [s]
-  (let [random-content (generate-random-str 100)
-	resource-name (rand-nth ["foo1" "foo2" "foo3"])
-	suffix (str "/resource/" resource-name)]
-    (merge s
-	   {:suffix suffix
-	    :content random-content
-	    :question (to-question :method :put
-				   :suffix suffix
-				   :body random-content)})))
 
 (defn get-partial-resource [s]
   (let [range (random-int 30 50)]
@@ -98,12 +88,17 @@
 				   :suffix (:suffix s)
 				   :headers {"Range" (str "bytes=0-" range)})})))
 
-; add error message indicating too long content
 (defn expect-partial-content [session]
   (let [content (subs (:content session) 0 (:range session))]
-   (assert-content content)))
+    (fn [resp & args]
+      (on-success resp
+		  #(if (> (count (:content resp)) (:range session))
+		     (respond-error "Content longer than expected")
+		     (if (content-equals? (:content resp) content)
+		       (respond-correct)
+		       (respond-fail)))))))
 
 (defn test-range-header [p & {session :state}]
-  (let [workflow [[put-partial-resource expect-success]
+  (let [workflow [[(put-resource 2) expect-success]
 		  [get-partial-resource expect-partial-content]]]
     (multistep-testcase p session workflow)))

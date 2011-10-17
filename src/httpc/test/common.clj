@@ -34,7 +34,7 @@
     {:x x :y y :a a :b b
      :op op-name :result (op x y)}))
 
-(defn- content-equals? [content expected]
+(defn content-equals? [content expected]
   (= (.toLowerCase (str expected)) (.. (str content) toLowerCase trim)))
 
 (defn- result

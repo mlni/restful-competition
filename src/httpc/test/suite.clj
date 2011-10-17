@@ -37,15 +37,16 @@
 (defn- init-suites []
   [(make-suite "Warmup" [test-your-name])
    (make-suite "Arithmetic" [test-two-number-arithmetic
-			     test-largest-number])
+			     test-largest-number
+			     test-nth-fib
+			     test-arithmetic-with-params])
    (make-suite "Basic HTTP" [test-user-agent
 			     test-referer
 			     test-cookies])
    (make-suite "Rest" [test-restful-resource])
    (make-suite "Sessions" [test-my-name-session
 			   test-arithmetic-with-session])
-   (make-suite "Dev" [test-my-name-session
-		      test-arithmetic-with-session])])
+   (make-suite "Dev" [test-range-header])])
 
 (def *suites* (atom (init-suites)))
 (def *suite* (atom (first @*suites*)))

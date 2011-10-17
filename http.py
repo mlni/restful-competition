@@ -25,7 +25,16 @@ class MyServer(BaseHTTPRequestHandler):
                 self.send_response(200, 'OK')
                 self.send_header('Content-type', 'text/html')
                 self.end_headers()
-                self.wfile.write( REST_STATE[self.path] )
+
+                if self.headers.get("Range") != -1:
+                    range_h = self.headers.get("Range")
+                    print "Range header: %s" % range_h 
+                    st, end = re.search("bytes=([0-9]+)-([0-9]+)", range_h).groups()
+                    st, end = int(st), int(end)
+                    
+                    self.wfile.write( REST_STATE[self.path][st:end] )
+                else:
+                    self.wfile.write( REST_STATE[self.path] )
             else:
                 self.send_response(404, 'Not Found')
                 self.send_header('Content-type', 'text/html')
@@ -142,8 +151,19 @@ def solve(params, headers):
         print "Session: ", vals
         ops = { "+": operator.add, "-": operator.sub, "*": operator.mul }
         result = ops[op](vals[n1], vals[n2])
+    elif q.find("Fibonacci") != -1:
+        n = re.search(" ([0-9]+)th number in Fibonacci", q).group(1)
+        result = fib(int(n))
+        print "fibonacci: %s = %s" % (n, result)
         
     return (out, result)
+
+def fib(n):
+    a, b = 0, 1
+    for i in range(n - 2):
+        c = a + b
+        a, b = b, c
+    return c
 
 if __name__ == "__main__":
     NAME=sys.argv[2]

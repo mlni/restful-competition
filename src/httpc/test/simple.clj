@@ -1,6 +1,7 @@
 (ns httpc.test.simple
   (:use httpc.test.common
-	[clojure.contrib.str-utils :only [str-join]]))
+	[clojure.contrib.str-utils :only [str-join]]
+	[clojure.contrib.lazy-seqs]))
 
 (defn test-your-name [p & args]
   (make-test p
@@ -32,6 +33,13 @@
 	       (to-question :params {:q q})
 	       (assert-content (str (apply max ns))))))
 
+(defn test-nth-fib [p & args]
+  (let [n (random-int 10 30)
+	f (nth (fibs) (dec n))]
+    (make-test p
+	       (to-question :params {:q (format "What is the %sth number in Fibonacci sequence" n)})
+	       (assert-content (str f)))))
+
 (defn test-user-agent [p & args]
   (let [ua (rand-nth ["Mozilla/5.0 Chrome/15.0.872.0 Safari/535.2"
 		      "Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0"
@@ -61,3 +69,4 @@
 	       (to-question :params params
 			    :headers { "Cookie" (format "%s=%s; %s=%s" a x b y) })
 	       (assert-content result))))
+

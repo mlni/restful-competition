@@ -106,12 +106,14 @@
 (defn set-player-attr! [p path val]
   (let [key (concat [(:id p)] path)]
     (dosync
-     (alter *players* assoc-in key val))))
+     (when (contains? @*players* (:id p))
+      (alter *players* assoc-in key val)))))
 
 (defn update-player-attr! [p path f]
   (let [key (concat [(:id p)] path)]
     (dosync
-     (alter *players* update-in key f))))
+     (when (contains? @*players* (:id p))
+      (alter *players* update-in key f)))))
 
 (defn- init []
   (dosync
