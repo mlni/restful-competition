@@ -12,6 +12,14 @@ class MyServer(BaseHTTPRequestHandler):
             params = cgi.parse_qs( self.path.split("?")[1] )
         print params
         print self.headers
+
+        if random.random() < 0.1:
+            self.send_response(200, 'OK')
+            self.send_header('Content-type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(NAME)
+            return
+        
         if "q" in params:
             head, body = solve(params, self.headers) 
             self.send_response(200, 'OK')
@@ -70,16 +78,19 @@ def largest_number(q):
     nums = [int(x) for x in q[q.index(":") + 1:].split(", ")]
     return max(nums)
 
-def arithm_params(q, params):
+def arithm_params(q, params, cookies):
     ops = { "+": operator.add, "-": operator.sub, "*": operator.mul }
-    m = re.search("is ([a-z]+) ([\+*-]) ([a-z]+)", q)
-    p1 = int(params[m.group(1)][0])
-    p2 = int(params[m.group(3)][0])
+    m = re.search("is ([a-z]+) ([\+*/-]) ([a-z]+)", q)
+    print cookies
+    print params
+    
+    p1 = int(m.group(1) in params and params[m.group(1)][0] or cookies[m.group(1)])
+    p2 = int(m.group(3) in params and params[m.group(3)][0] or cookies[m.group(3)])
     return ops[m.group(2)](p1, p2)
 
 def arithm(q):
-    ops = { "+": operator.add, "-": operator.sub, "*": operator.mul }
-    m = re.search("is ([0-9]+) ([\+*-]) ([0-9]+)", q)
+    ops = { "+": operator.add, "-": operator.sub, "*": operator.mul, "/": operator.div }
+    m = re.search("is ([0-9]+) ([\+*/-]) ([0-9]+)", q)
     return ops[m.group(2)](int(m.group(1)), int(m.group(3)))
 
 def referer(h):
@@ -105,14 +116,21 @@ def solve(params, headers):
     global SESSIONS
     out = []
     result = NAME
+
+    cookies = {}
+    if "Cookie" in headers:
+        pcs = headers["Cookie"].split("; ")
+        for p in pcs:
+            k, v = p.split("=")
+            cookies[k.strip()] = v.strip()
     
     q = params["q"][0]
     if q.find("largest") != -1:
         # Which of the numbers is largest: 841, 973, 279, 146, 923
         result = largest_number(q)
-    elif re.search("How much is [a-z] [\+*-] [a-z]", q):
-        result = arithm_params(q, params)
-    elif re.search("How much is [0-9]+ [\+*-] [0-9]+", q):
+    elif re.search("How much is [a-z] [\+*/-] [a-z]", q):
+        result = arithm_params(q, params, cookies)
+    elif re.search("How much is [0-9]+ [\+*/-] [0-9]+", q):
         result = arithm(q)
     elif q.find("Which page am I coming from") != -1:
         result = referer(headers)
@@ -155,6 +173,10 @@ def solve(params, headers):
         n = re.search(" ([0-9]+)th number in Fibonacci", q).group(1)
         result = fib(int(n))
         print "fibonacci: %s = %s" % (n, result)
+    elif q.find("What is my user agent") != -1:
+        result = headers.get("User-Agent")
+    elif q.find("Which browser am I using") != -1:
+        result = headers.get("User-Agent")
         
     return (out, result)
 
