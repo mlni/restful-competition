@@ -36,10 +36,15 @@
 
 (defn- init-suites []
   [(make-suite "Warmup" [test-your-name])
-   (make-suite "Arithmetic" [test-two-number-arithmetic
-			     test-largest-number
-			     test-nth-fib
-			     test-arithmetic-with-params])
+   (make-suite "Arithmetic 1" [test-largest-number
+			       test-two-numbers-sum])
+   (make-suite "Arithmetic 2" [test-largest-number
+			       test-two-numbers-sum
+			       test-two-numbers-multiply
+			       test-two-numbers-subtract
+			       test-two-numbers-division
+			       test-nth-fib
+			       test-arithmetic-with-params])
    (make-suite "Basic HTTP" [test-user-agent
 			     test-referer
 			     test-cookies])

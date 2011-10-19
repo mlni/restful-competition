@@ -1,6 +1,6 @@
 (ns httpc.runner
   (:require [http.async.client :as c])
-  (:use [httpc player]
+  (:use [httpc player log]
 	[httpc.test common suite]
 	:reload-all)
   (:gen-class))
@@ -38,10 +38,12 @@
 (defn- fire-request [client test]
   (let [r (:request test)
 	url (concatenate-url (get-in test [:player :url]) (:url (:request test)))
+	method-name (or (:method r) :get)
 	method (get {:get c/GET :put c/PUT
 		     :post c/POST :delete c/DELETE
-		     :head c/HEAD} (:method r) c/GET)
+		     :head c/HEAD} method-name)
 	headers (merge {"User-Agent" "RESTful Competition/1.0"} (:headers r))]
+    (player-log (:player test) "<- %s %s %s %s" method-name url (:query r) headers)
     {:test test
      :response (method client url
 		       :query (:query r) :headers headers :body (:body r)
@@ -56,9 +58,11 @@
 	  start (start-timestamp)]
       (loop [responses responses]
 	(let [[finished remaining] (split-by-pred #(c/done? (:response %)) responses)]
-	  (doall remaining) ; force execution
+	  (doall remaining)		; force execution
 	  (doseq [r finished]
-	    (assert-response! (:test r) (to-response (:response r))))
+	    (let [resp (to-response (:response r))]
+	      (player-log (get-in r [:test :player]) "-> %s" resp)
+	      (assert-response! (:test r) resp)))
 	  (cond (empty? remaining) 'done
 		(timeout? start) (record-timeout! (map :test remaining))
 		:else

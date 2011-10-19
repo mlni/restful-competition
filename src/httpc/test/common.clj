@@ -1,5 +1,5 @@
 (ns httpc.test.common
-  (:use [httpc.player]
+  (:use [httpc player log]
 	clojure.pprint)
   (:gen-class))
 
@@ -26,10 +26,10 @@
 (defn random-ints [n min max]
   (repeatedly n #(random-int min max)))
 
-(defn create-arithmetic-testcase []
+(defn create-arithmetic-testcase [ops]
   (let [[x y] (random-ints 2 1 100)
 	[a b] (rand-nth [["a" "b"] ["x" "y"] ["f" "g"] ["i" "j"]])
-	op (rand-nth [+ - *])
+	op (rand-nth ops)
 	op-name (function-name op)]
     {:x x :y y :a a :b b
      :op op-name :result (op x y)}))
@@ -85,6 +85,16 @@
 (defn test-name []
   *test-name*)
 
+
+(defn- add-scores [result test]
+  (let [base-score (get test :score 1)
+	test-score (if (< (correct-answers) 10) (* 10 base-score) base-score)
+	base-penalty (get test :penalty -1)
+	test-penalty (if (> (correct-answers) 0) (* 10 base-penalty) base-penalty)]
+    (merge result {:test-score test-score
+		   :test-penalty test-penalty})))
+
+
 (defn setup-test [test-fn player]
   (let [test-name (function-name test-fn)
 	test-state (get-in player [:test-state test-name])]
@@ -100,7 +110,7 @@
   (binding [*test-name* (:name test)
 	    *correct-answers* (get-in test [:player :completed-tests (:name test)] 0)]
    (let [result (assert-test test resp)
-	 log-entry (make-log-event result)]
+	 log-entry (make-log-event (add-scores result test))]
      (when (:next-state test)
        (let [ns ((:next-state test) test result resp)]
 	 (set-player-attr! (:player test) [:test-state (test-name)] ns)
@@ -111,4 +121,5 @@
        (update-player-attr! (:player test) [:completed-tests]
 			    #(update-in % [(test-name)]
 					(fn [v] (inc (or v 0))))))
+     (player-log (:player test) "= %s" log-entry)
      (record-event! (:player test) log-entry))))

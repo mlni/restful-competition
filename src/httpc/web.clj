@@ -176,7 +176,8 @@
 	[:tr
 	 [:td (format-time (:time evt))]
 	 [:td.center [:img {:src (status-icon (:status evt))
-			    :alt (name (:status evt))}]]
+			    :alt (name (:status evt))
+			    :title (name (:status evt))}]]
 	 [:td.center (:score evt)]
 	 [:td {:width "70%"} (:message evt)]])]]))
 

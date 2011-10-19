@@ -1,7 +1,7 @@
 (ns httpc.core
   (:require [compojure.route :as route]
             [compojure.handler :as handler])
-  (:use [httpc player web runner]
+  (:use [httpc player web runner log]
 	[ring.adapter.jetty :only [run-jetty]]
 	(ring.util [response :as response])
 	[ring.middleware (reload :only [wrap-reload])
@@ -26,12 +26,13 @@
 
 (defn start-webserver []
   (println "Launching jetty")
-  (run-jetty (app) {:port 8080 :join? false}))
+  (run-jetty (app) {:port 5000 :join? false}))
 
 (defn start-poller []
   (println "Launching testrunner")
   (.start (Thread. (fn [] (test-thread-main)))))
 
 (defn -main [& args]
+  (ensure-log-dir)
   (start-webserver)
   (start-poller))

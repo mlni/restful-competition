@@ -1,4 +1,5 @@
 (ns httpc.player
+  (:import java.io.File)
   (:gen-class))
 
 (def *max-log-items* 20)
@@ -38,12 +39,14 @@
   (dosync
    (alter *players* dissoc id)))
 
-(defn score [status]
+(defn score [result]
   ; status: :error :ok :fail :timeout
-  (get {:ok 10
-	:fail -1
+  (case (:status result)
+	:ok (get result :test-score 1)
+	:fail (get result :test-penalty -1)
 	:error -10
-	:timeout -10} status 0))
+	:timeout -10
+	0))
 
 (defn active-players []
   (let [now (System/currentTimeMillis)]
@@ -63,7 +66,7 @@
     {:time (System/currentTimeMillis)
      :status status
      :message (str msg)
-     :score (score status)}))
+     :score (score result)}))
 
 (defn- error-timeout []
   (+ (System/currentTimeMillis) *error-delay*))
@@ -94,9 +97,12 @@
    (alter *players* (set-all-attrs :completed-tests {}))))
 
 (defn save-data! []
-  (let [data (binding [*print-dup* true]
+  (let [dir (File. "data")
+	data (binding [*print-dup* true]
 	       (print-str @*players*))]
-   (spit "data/players.txt" data)))
+    (when (not (.exists dir))
+      (.mkdir dir))
+    (spit "data/players.txt" data)))
 
 (defn load-data! []
   (let [data (read-string (slurp "data/players.txt"))]
