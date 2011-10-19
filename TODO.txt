@@ -1,10 +1,11 @@
 * add the rest of restful tests
-* add proper logging
 * add per test scores
 * track number of questions asked/correctly answered per player per suite
 * refactor rest tests and session tests to use common core
 * add incremental test addition within suite
 * make score calculation take number of correct answers into account
+
+* make arithm tests incrementally harder
 
 * deactivation of passive users?
 * support redirects?
@@ -41,6 +42,7 @@ rest
 * per user request delays
 * make Range and Fibo tests incrementally harder
 * make restful resource random
+* add proper logging
 
 
 
