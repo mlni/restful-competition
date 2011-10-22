@@ -51,14 +51,21 @@
 		   [this [val next]])
 		 keys fns))))
 
-(defn session-testcase [p sessions functions parallel-sessions]
+(defn workflow [functions]
+  (let [state-machine (construct-statemachine functions)]
+    (fn [session]
+      (let [[current-step next-state-name] (state-machine (:state session))]
+	(-> session
+	    current-step
+	    (assoc :next-state next-state-name))))))
+
+(defn session-testcase [p sessions workflow parallel-sessions]
   "Run the next step in session-using test case. The test case has to be specified
    using a sequence of functions that manipulate the session state.
    The test instance is constructed using the :question and :cookies keys."
-  (let [statemachine (construct-statemachine functions)
-	[sid session] (pick-random-session sessions parallel-sessions)
-	[test-fn next-state] (statemachine (:state session))
-	session (test-fn session)]
+  (let [[sid session] (pick-random-session sessions parallel-sessions)
+	session (workflow session)
+	next-state (:next-state session)]
    (make-test p
 	      (to-question :params {:q (:question session)}
 			   :headers (if (:cookies session)
@@ -68,4 +75,5 @@
 	      :next-state (calculate-next-state next-state
 						(assoc-in sessions [sid] session)
 						sid)
+	      :score (:score test)
 	      :final (nil? next-state))))

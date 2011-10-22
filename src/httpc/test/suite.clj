@@ -53,5 +53,5 @@
 			   test-arithmetic-with-session])
    (make-suite "Dev" [test-nth-fib])])
 
-(def *suites* (atom (init-suites)))
-(def *suite* (atom (first @*suites*)))
+(defonce *suites* (atom (init-suites)))
+(defonce *suite* (atom (first @*suites*)))

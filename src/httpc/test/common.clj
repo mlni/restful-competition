@@ -87,9 +87,9 @@
 
 
 (defn- add-scores [result test]
-  (let [base-score (get test :score 1)
+  (let [base-score (or (get test :score) 1)
 	test-score (if (< (correct-answers) 10) (* 10 base-score) base-score)
-	base-penalty (get test :penalty -1)
+	base-penalty (or (get test :penalty) -1)
 	test-penalty (if (> (correct-answers) 0) (* 10 base-penalty) base-penalty)]
     (merge result {:test-score test-score
 		   :test-penalty test-penalty})))
