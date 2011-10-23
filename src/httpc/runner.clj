@@ -80,6 +80,6 @@
 	  (.printStackTrace e)))
       (let [delay (- *test-interval* (- (System/currentTimeMillis) start))]
 	(when (pos? delay)
-	  (Thread/sleep delay)))
-      (when (not (terminate?))
-	(recur)))))
+	  (Thread/sleep delay))
+	(when (not (terminate?))
+	(recur))))))
