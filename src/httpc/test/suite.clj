@@ -51,7 +51,7 @@
    (make-suite "Rest" [test-restful-resource])
    (make-suite "Sessions" [test-my-name-session
 			   test-arithmetic-with-session])
-   (make-suite "Dev" [test-nth-fib])])
+   (make-suite "Dev" [test-content-types])])
 
 (defonce *suites* (atom (init-suites)))
 (defonce *suite* (atom (first @*suites*)))

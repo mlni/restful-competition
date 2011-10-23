@@ -27,6 +27,7 @@
 	       (:question next)
 	       (assert-fn next)
 	       :next-state (update-state-on-success next)
+	       :score (:score session)
 	       :final (nil? next-state))))
 
 ; end of generic functionality
@@ -46,23 +47,27 @@
 	  :else (respond-fail "Server did not respond with 404"))))
 
 
-(defn put-resource [start-number]
-  (fn [s]
-    (let [random-content (generate-random-str 100)
-	  resources (map #(str "foo" %1) (range start-number 21 2))
-	  resource-name (rand-nth resources)
-	  suffix (str "/resource/" resource-name)]
-      (merge s
-	     {:suffix suffix
-	      :content random-content
-	      :question (to-question :method :put
-				     :suffix suffix
-				     :body random-content)}))))
+(defn put-resource [s]
+  (let [random-content (generate-random-str 100)
+	resources (map #(str "foo" %1) (range 1 21 2))
+	resource-name (rand-nth resources)
+	suffix (str "/resource/" resource-name)]
+    (merge s
+	   {:suffix suffix
+	    :content random-content
+	    :score 2
+	    :question (to-question :method :put
+				   :suffix suffix
+				   :headers {"Content-Type" "text/plain"}
+				   :body random-content)})))
 
 (defn get-resource [s]
-  (assoc s
-    :question (to-question :method :get
-			   :suffix (:suffix s))))
+  (-> s
+      (assoc
+	  :question (to-question :method :get
+				 :headers {"Accept" "text/plain"}
+				 :suffix (:suffix s)))
+      (assoc :score 4)))
 
 (defn delete-resource [s]
   (assoc s
@@ -74,9 +79,12 @@
   (let [range (random-int 30 50)]
     (merge s
 	   {:range range
+	    :score 6
 	    :question (to-question :method :get
+				   :headers {}
 				   :suffix (:suffix s)
-				   :headers {"Range" (str "bytes=0-" range)})})))
+				   :headers {"Range" (str "bytes=0-" range)
+					     "Accept" "text/plain"})})))
 
 (defn expect-partial-content [session]
   (let [content (subs (:content session) 0 (:range session))]
@@ -98,3 +106,55 @@
 			  [get-resource expect-not-found]])]
     (println "Correct: " (correct-answers))
     (multistep-testcase p session workflow)))
+
+
+(defn test-content-types [p & {session :state}]
+  (letfn [(put-json [s]
+		    (let [resources (map #(str "foo" %1) (range 2 21 2))
+			  path (str "/resource/" (rand-nth resources))
+			  content (generate-random-str 128)
+			  json (str "{ \"data\": \"" content "\" }")]
+		      (merge s
+			     {:question (to-question :method :put
+						  :suffix path
+						  :body json
+						  :headers {"Content-Type" "application/json"})
+			      :content content
+			      :path path
+			      :json json
+			      :score 4})))
+	  (put-xml [s]
+		   (let [xml (str "<root><data>" (:content s) "</data></root>")]
+		     (merge s
+			    {:question (to-question :method :put
+						    :suffix (:path s)
+						    :body xml
+						    :headers {"Content-Type" "text/xml"})
+			      :xml xml})))
+	  (get-json [s]
+		    (assoc s :question (to-question :suffix (:path s)
+						    :headers {"Accept" "application/json"})))
+	  (get-xml [s]
+		   (assoc s :question (to-question :suffix (:path s)
+						   :headers {"Accept" "text/xml"})))
+	  (delete-resource [s]
+			   (merge s
+				  {:question (to-question :method :delete
+							  :suffix (:path s))
+				   :score 7}))
+	  (assert-content-type [r type content]
+			       (fn []
+				 (if (= (get-in r [:headers :content-type]) type)
+				   ((assert-content content) r)
+				   (respond-fail "Content type not recognized"))))
+	  (expect-json [s] (fn [r] (on-success r (assert-content-type r "application/json"
+								      (:json s)))))
+	  (expect-xml [s] (fn [r] (on-success r (assert-content-type r "text/xml"
+								     (:xml s)))))]
+    (let [wf [[put-json expect-success]
+	      [put-xml expect-success]
+	      [get-json expect-json]
+	      [get-xml expect-xml]
+	      [delete-resource expect-success]]]
+      (multistep-testcase p session wf))))
+

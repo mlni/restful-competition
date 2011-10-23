@@ -13,7 +13,7 @@ class MyServer(BaseHTTPRequestHandler):
         print params
         print self.headers
 
-        if random.random() < 0.1:
+        if 0 and random.random() < 0.1:
             self.send_response(200, 'OK')
             self.send_header('Content-type', 'text/plain')
             self.end_headers()
@@ -30,8 +30,9 @@ class MyServer(BaseHTTPRequestHandler):
             self.wfile.write( body )
         else:
             if self.path in REST_STATE:
+                ctype = self.headers.getheader("accept")
                 self.send_response(200, 'OK')
-                self.send_header('Content-type', 'text/html')
+                self.send_header('Content-type', ctype)
                 self.end_headers()
 
                 if self.headers.get("Range"):
@@ -40,9 +41,9 @@ class MyServer(BaseHTTPRequestHandler):
                     st, end = re.search("bytes=([0-9]+)-([0-9]+)", range_h).groups()
                     st, end = int(st), int(end)
                     
-                    self.wfile.write( REST_STATE[self.path][st:end] )
+                    self.wfile.write( REST_STATE[self.path][ctype][st:end] )
                 else:
-                    self.wfile.write( REST_STATE[self.path] )
+                    self.wfile.write( REST_STATE[self.path][ctype] )
             else:
                 self.send_response(404, 'Not Found')
                 self.send_header('Content-type', 'text/html')
@@ -60,9 +61,12 @@ class MyServer(BaseHTTPRequestHandler):
         global REST_STATE
         length = int(self.headers.getheader('content-length'))
         data = self.rfile.read(length)
+        ctype = self.headers.getheader('content-type')
+        print "Got", ctype, data, self.path
         
-        REST_STATE[self.path] = data
-        print "Got", data, self.path
+        content = REST_STATE.get(self.path, {})
+        content[ctype] = data
+        REST_STATE[self.path] = content
         
         self.send_response(200, 'OK')
         self.send_header('Content-type', 'text/html')

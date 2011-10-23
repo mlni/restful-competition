@@ -56,13 +56,14 @@
 	       :score 3)))
 
 (defn test-user-agent [p & args]
-  (let [ua (rand-nth ["Mozilla/5.0 Chrome/15.0.872.0 Safari/535.2"
-		      "Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0"
-		      "Mozilla/5.0 (X11; Linux i686; rv:6.0) Gecko/20100101 Firefox/6.0"
-		      "Mozilla/5.0 (X11; en-US; rv:1.9.2.8) Gecko/20101230 Firefox/3.6.8"
-		      "Googlebot/2.1 (+http://www.googlebot.com/bot.html)"])]
+  (let [uas ["Mozilla/5.0 Chrome/15.0.872.0 Safari/535.2"
+	     "Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0"
+	     "Mozilla/5.0 (X11; Linux i686; rv:6.0) Gecko/20100101 Firefox/6.0"
+	     "Mozilla/5.0 (X11; en-US; rv:1.9.2.8) Gecko/20101230 Firefox/3.6.8"
+	     "Googlebot/2.1 (+http://www.googlebot.com/bot.html)"]
+	ua (if (< (correct-answers) 5) (first uas) (rand-nth uas))]
     (make-test p
-	       (to-question :params {:q "Which broswer am I using"}
+	       (to-question :params {:q "Which browser am I using"}
 			    :headers {"User-Agent" ua})
 	       (assert-content ua)
 	       :score 3)))
@@ -72,7 +73,7 @@
 	      "http://www.google.com/search?q=worst%20game%20ever"
 	      "http://en.wikipedia.org/wiki/Representational_state_transfer"
 	      "http://imgur.com/gallery/SkeSE"]
-	rnd-ref (rand-nth refs)]
+	rnd-ref (if (< (correct-answers) 5) (first refs) (rand-nth refs))]
     (make-test p
 	       (to-question :params {:q "Which page am I coming from"}
 			    :headers {"Referer" rnd-ref})

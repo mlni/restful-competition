@@ -32,7 +32,10 @@
   (println "Launching testrunner")
   (.start (Thread. (fn [] (test-thread-main)))))
 
-(defn -main [& args]
+(defn start-app []
   (ensure-log-dir)
   (start-webserver)
   (start-poller))
+
+(defn -main [& args]
+  (start-app))
