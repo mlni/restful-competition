@@ -94,7 +94,6 @@
     (merge result {:test-score test-score
 		   :test-penalty test-penalty})))
 
-
 (defn setup-test [test-fn player]
   (let [test-name (function-name test-fn)
 	test-state (get-in player [:test-state test-name])]

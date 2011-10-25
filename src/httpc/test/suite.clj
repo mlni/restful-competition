@@ -10,7 +10,7 @@
 (defn all-suites []
   (deref *suites*))
 
-(defn all-test-in-suite []
+(defn all-tests-in-suite []
   (:tests (deref *suite*)))
 
 (defn switch-suite! [s]

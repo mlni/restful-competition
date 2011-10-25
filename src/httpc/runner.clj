@@ -1,6 +1,6 @@
 (ns httpc.runner
   (:require [http.async.client :as c])
-  (:use [httpc player log]
+  (:use [httpc player log fortunes]
 	[httpc.test common suite]
 	:reload-all)
   (:gen-class))
@@ -42,7 +42,9 @@
 	method (get {:get c/GET :put c/PUT
 		     :post c/POST :delete c/DELETE
 		     :head c/HEAD} method-name)
-	headers (merge {"User-Agent" "RESTful Competition/1.0"} (:headers r))]
+	headers (merge {"User-Agent" "RESTful Competition/1.0"
+			"X-Bender" (next-bender-fortune)}
+		       (:headers r))]
     (player-log (:player test) "<- %s %s %s %s" method-name url (:query r) headers)
     {:test test
      :response (method client url

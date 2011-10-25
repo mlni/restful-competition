@@ -81,7 +81,6 @@
 	   {:range range
 	    :score 6
 	    :question (to-question :method :get
-				   :headers {}
 				   :suffix (:suffix s)
 				   :headers {"Range" (str "bytes=0-" range)
 					     "Accept" "text/plain"})})))
@@ -98,7 +97,7 @@
 
 (defn test-restful-resource [p & {session :state}]
   "Test PUT/GET/DELETE cycle of a resource"
-  (let [workflow (concat [[(put-resource 1) expect-success]
+  (let [workflow (concat [[put-resource expect-success]
 			  [get-resource expect-content]]
 			 (when (>= (correct-answers) 5)
 			   [[get-partial-resource expect-partial-content]])

@@ -1,7 +1,7 @@
 (ns httpc.core
   (:require [compojure.route :as route]
             [compojure.handler :as handler])
-  (:use [httpc player web runner log]
+  (:use [httpc player web runner log fortunes]
 	[ring.adapter.jetty :only [run-jetty]]
 	(ring.util [response :as response])
 	[ring.middleware (reload :only [wrap-reload])
