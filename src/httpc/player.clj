@@ -107,7 +107,7 @@
 (defn load-data! []
   (let [data (read-string (slurp "data/players.txt"))]
     (dosync
-     (alter *players* data))))
+     (ref-set *players* data))))
 
 (defn set-player-attr! [p path val]
   (let [key (concat [(:id p)] path)]

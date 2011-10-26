@@ -15,11 +15,15 @@
 	 op-name (function-name op)]
      (make-test p
 		(to-question :params {:q (format "How much is %s %s %s" a op-name b)})
-		(assert-content (str (op a b)))))))
+		(assert-content (str (op a b)))
+		:penalty -3))))
 
-(def test-two-numbers-sum (create-two-number-aritmetic-test +))
-(def test-two-numbers-subtract (create-two-number-aritmetic-test -))
-(def test-two-numbers-multiply (create-two-number-aritmetic-test *))
+(defn test-two-numbers-sum [p & args]
+  ((create-two-number-aritmetic-test +) p))
+(defn test-two-numbers-subtract [p & args]
+  ((create-two-number-aritmetic-test -) p))
+(defn test-two-numbers-multiply [p & args]
+  ((create-two-number-aritmetic-test *) p))
 
 (defn test-two-numbers-division [p & args]
   (let [[a b] (random-ints 2 1 20)
@@ -53,7 +57,8 @@
     (make-test p
 	       (to-question :params {:q (format "What is the %sth number in Fibonacci sequence" n)})
 	       (assert-content (str f))
-	       :score 3)))
+	       :score 3
+	       :penalty -3)))
 
 (defn test-user-agent [p & args]
   (let [uas ["Mozilla/5.0 Chrome/15.0.872.0 Safari/535.2"
@@ -66,7 +71,8 @@
 	       (to-question :params {:q "Which browser am I using"}
 			    :headers {"User-Agent" ua})
 	       (assert-content ua)
-	       :score 3)))
+	       :score 3
+	       :penalty -2)))
 
 (defn test-referer [p & args]
   (let [refs ["http://webmedia.eu/company/jobs/"
@@ -78,7 +84,8 @@
 	       (to-question :params {:q "Which page am I coming from"}
 			    :headers {"Referer" rnd-ref})
 	       (assert-content rnd-ref)
-	       :score 3)))
+	       :score 3
+	       :penalty -2)))
 
 (defn test-cookies [p & args]
   (let [{:keys [x y a b op result]} (create-arithmetic-testcase [+ - *])
@@ -87,4 +94,5 @@
 	       (to-question :params params
 			    :headers { "Cookie" (format "%s=%s; %s=%s" a x b y) })
 	       (assert-content result)
-	       :score 5)))
+	       :score 5
+	       :penalty -2)))

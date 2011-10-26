@@ -4,7 +4,7 @@
 	    [compojure.route :as route])
   (:use [hiccup core page-helpers form-helpers]
 	[httpc player]
-	[httpc.test suite]
+	[httpc.test suite (common :only [count-completed-tests])]
 	[clojure.contrib.json]
 	compojure.core :reload-all))
 
@@ -106,7 +106,7 @@
 					:name (:name p)
 					:url (:url p)
 					:score (:score p)
-					:completed (count (:completed-tests p))
+					:completed (count-completed-tests p (suite-test-names))
 					:total (count (all-tests-in-suite))}))
 		     [] (players-by-score))]
     (-> (response/response (json-str body))
@@ -260,8 +260,7 @@
 
 (defn do-switch-suite [suite]
   (when (non-blank? suite)
-    (switch-suite! suite)
-    (reset-progress!))
+    (switch-suite! suite))
   (response/redirect "/admin"))
 
 (defn do-reset-scores []

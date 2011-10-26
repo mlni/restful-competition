@@ -85,12 +85,20 @@
 (defn test-name []
   *test-name*)
 
+(defn count-completed-tests [player test-names]
+  (count (filter (fn [name] (pos? (get-in player [:completed-tests name])))
+		 test-names)))
+
+(defn completed-test-names [player]
+  (map first
+       (filter (fn [[name completed]] (pos? completed))
+	       (get player :completed-tests))))
 
 (defn- add-scores [result test]
   (let [base-score (or (get test :score) 1)
 	test-score (if (< (correct-answers) 10) (* 10 base-score) base-score)
 	base-penalty (or (get test :penalty) -1)
-	test-penalty (if (> (correct-answers) 0) (* 10 base-penalty) base-penalty)]
+	test-penalty (if (>= (correct-answers) 2) (* 10 base-penalty) base-penalty)]
     (merge result {:test-score test-score
 		   :test-penalty test-penalty})))
 
@@ -113,8 +121,9 @@
      (when (:next-state test)
        (let [ns ((:next-state test) test result resp)]
 	 (set-player-attr! (:player test) [:test-state (test-name)] ns)
-	 (pprint (:test-state (get-in @*players* [(get-in test [:player :id])])))
-	 (flush)))
+	 (player-log (:player test)
+		     "state %s"
+		     (:test-state (get-in @*players* [(get-in test [:player :id])])))))
      (when (and (= :ok (:status result))
 		(:final test))
        (update-player-attr! (:player test) [:completed-tests]

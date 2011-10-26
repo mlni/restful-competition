@@ -103,7 +103,6 @@
 			   [[get-partial-resource expect-partial-content]])
 			 [[delete-resource expect-success]
 			  [get-resource expect-not-found]])]
-    (println "Correct: " (correct-answers))
     (multistep-testcase p session workflow)))
 
 
