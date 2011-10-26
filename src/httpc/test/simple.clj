@@ -49,7 +49,7 @@
 
 (defn test-nth-fib [p & args]
   (let [n (random-int 10 (if (< (correct-answers) 5) 30 300))
-	f (nth (fibs) (dec n))]
+	f (nth (fibs) n)]
     (make-test p
 	       (to-question :params {:q (format "What is the %sth number in Fibonacci sequence" n)})
 	       (assert-content (str f))

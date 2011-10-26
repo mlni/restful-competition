@@ -143,7 +143,7 @@
 				   :score 7}))
 	  (assert-content-type [r type content]
 			       (fn []
-				 (if (= (get-in r [:headers :content-type]) type)
+				 (if (.startsWith (str (get-in r [:headers :content-type])) type)
 				   ((assert-content content) r)
 				   (respond-fail "Content type not recognized"))))
 	  (expect-json [s] (fn [r] (on-success r (assert-content-type r "application/json"
@@ -156,4 +156,3 @@
 	      [get-xml expect-xml]
 	      [delete-resource expect-success]]]
       (multistep-testcase p session wf))))
-
