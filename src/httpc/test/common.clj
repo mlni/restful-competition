@@ -86,7 +86,7 @@
   *test-name*)
 
 (defn count-completed-tests [player test-names]
-  (count (filter (fn [name] (pos? (get-in player [:completed-tests name])))
+  (count (filter (fn [name] (pos? (get-in player [:completed-tests name] 0)))
 		 test-names)))
 
 (defn completed-test-names [player]
