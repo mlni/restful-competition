@@ -6,7 +6,7 @@
   (:gen-class))
 
 (def *timeout* 5000)
-(def *test-interval* 5000)
+(def *test-interval* 10000)
 (def *terminate* (atom false))
 
 (defn to-response [r]
@@ -58,19 +58,25 @@
     (let [tests (create-tests)
 	  responses (doall (map #(fire-request client %) tests))
 	  start (start-timestamp)]
-      (loop [responses responses]
-	(let [[finished remaining] (split-by-pred #(c/done? (:response %)) responses)]
+      (println "active players: " (sort (map #(get-in % [:player :name]) tests)))
+      (loop [responses responses responded #{}]
+	(let [[finished remaining] (split-by-pred #(c/done? (:response %)) responses)
+	      handled (doall
+		       (for [r finished
+			     :when (not (contains? responded r))]
+			(let [resp (to-response (:response r))]
+			  (player-log (get-in r [:test :player]) "-> %s" resp)
+			  (println (java.util.Date.) " assert-response! " (get-in r [:test :player :name]))
+			  (flush)
+			  (assert-response! (:test r) resp)
+			  r)))]
 	  (doall remaining)		; force execution
-	  (doseq [r finished]
-	    (let [resp (to-response (:response r))]
-	      (player-log (get-in r [:test :player]) "-> %s" resp)
-	      (assert-response! (:test r) resp)))
 	  (cond (empty? remaining) 'done
 		(timeout? start) (record-timeout! (map :test remaining))
 		:else
 		(do
 		  (Thread/sleep 100)
-		  (recur remaining))))))))
+		  (recur remaining (reduce conj responded handled)))))))))
 
 (defn test-thread-main []
   (reset! *terminate* false)

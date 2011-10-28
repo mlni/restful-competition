@@ -67,7 +67,8 @@
 	  :question (to-question :method :get
 				 :headers {"Accept" "text/plain"}
 				 :suffix (:suffix s)))
-      (assoc :score 4)))
+      (assoc :score 4)
+      (assoc :penalty -3)))
 
 (defn delete-resource [s]
   (assoc s
@@ -80,6 +81,7 @@
     (merge s
 	   {:range range
 	    :score 6
+	    :penalty -3
 	    :question (to-question :method :get
 				   :suffix (:suffix s)
 				   :headers {"Range" (str "bytes=0-" range)
@@ -120,7 +122,8 @@
 			      :content content
 			      :path path
 			      :json json
-			      :score 4})))
+			      :score 4
+			      :penalty -3})))
 	  (put-xml [s]
 		   (let [xml (str "<root><data>" (:content s) "</data></root>")]
 		     (merge s
@@ -139,7 +142,7 @@
 			   (merge s
 				  {:question (to-question :method :delete
 							  :suffix (:path s))
-				   :score 7}))
+				   :score 5}))
 	  (assert-content-type [r type content]
 			       (fn []
 				 (if (.startsWith (str (get-in r [:headers :content-type])) type)

@@ -75,5 +75,5 @@
 	      :next-state (calculate-next-state next-state
 						(assoc-in sessions [sid] session)
 						sid)
-	      :score (:score test)
+	      :score (:score session)
 	      :final (nil? next-state))))

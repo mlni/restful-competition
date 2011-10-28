@@ -12,11 +12,13 @@
 				      "Donald" "Dennis" "Rob" "Edsger" "Martin"])]
 		  (-> s
 		      (assoc :expected name)
-		      (assoc :question (question "My name is %s. What is my name" name)))))
+		      (assoc :question (question "My name is %s. What is my name" name))
+		      (assoc :score 3))))
 	  (resend [s]
 		  (-> s
 		      (assoc :question (question "What is my name"))
-		      (assoc :score 4)))]
+		      (assoc :score 5)
+		      (assoc :penalty -5)))]
    (let [parallel-sessions (if (> (correct-answers) 5) 3 1)
 	 wf (workflow [init
 		       resend
@@ -25,23 +27,28 @@
 
 
 (defn test-arithmetic-with-session [p & {sessions :state}]
-  "Remember values of parameters and calculate the value an arithmetic expression"
+  "Remember values of parameters and calculate the value of an arithmetic expression"
   (letfn [(init [s]
 		(let [{:keys [x y a b op result]} (create-arithmetic-testcase [* - +])]
 		  (merge s {:param1 a :param2 b :val1 x :val2 y :op-name op :result result
-			    :expected x :question (question "Let %s be %s. What is %s" a x a)})))
+			    :expected x :question (question "Let %s be %s. What is %s" a x a)
+			    :score 2
+			    :penalty -2})))
 	  (arg2 [s]
 		(let [{:keys [param2 val2]} s]
 		  (-> s
 		      (assoc :question (question "Let %s be %s. What is %s" param2 val2 param2))
-		      (assoc :expected val2))))
+		      (assoc :expected val2)
+		      (assoc :score 5)
+		      (assoc :penalty -5))))
 	  (result [s]
 		  (let [{:keys [param1 param2 op-name result]} s]
 		    (-> s
 			(assoc :question
 			  (question "Remember how much is %s %s %s" param1 op-name param2))
 			(assoc :expected result)
-			(assoc :score 5))))]
+			(assoc :score 5)
+			(assoc :penalty -4))))]
     
    (let [corrects (correct-answers)
 	 num-sessions (if (>= corrects 5) 3 1)

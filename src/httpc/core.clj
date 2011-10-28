@@ -1,6 +1,7 @@
 (ns httpc.core
   (:require [compojure.route :as route]
-            [compojure.handler :as handler])
+            [compojure.handler :as handler]
+	    [swank.swank])
   (:use [httpc player web runner log fortunes]
 	[ring.adapter.jetty :only [run-jetty]]
 	(ring.util [response :as response])
@@ -26,7 +27,7 @@
 
 (defn start-webserver []
   (println "Launching jetty")
-  (run-jetty (app) {:port 8080 :join? false}))
+  (run-jetty (app) {:port 5000 :join? false}))
 
 (defn start-poller []
   (println "Launching testrunner")
@@ -37,5 +38,11 @@
   (start-webserver)
   (start-poller))
 
+(defn start-swank []
+  (swank.swank/start-repl))
+
 (defn -main [& args]
-  (start-app))
+  (start-app)
+  (try
+    (start-swank)
+    (catch Exception e (println "Could not start swank " e))))
