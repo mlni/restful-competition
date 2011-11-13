@@ -27,7 +27,7 @@
 
 (defn start-webserver []
   (println "Launching jetty")
-  (run-jetty (app) {:port 5000 :join? false}))
+  (run-jetty (app) {:port 8080 :join? false}))
 
 (defn start-poller []
   (println "Launching testrunner")

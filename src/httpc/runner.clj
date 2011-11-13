@@ -1,4 +1,5 @@
 (ns httpc.runner
+  (:import [java.text SimpleDateFormat])
   (:require [http.async.client :as c])
   (:use [httpc player log fortunes]
 	[httpc.test common suite]
@@ -14,6 +15,10 @@
    :content (c/string r)
    :error (c/error r)
    :status (c/status r)})
+
+(defn- log [& msg]
+  (let [ts (.format (SimpleDateFormat. "HH:mm:ss") (java.util.Date.))]
+    (apply println (concat [ts] msg))))
 
 (defn- start-timestamp []
   (System/currentTimeMillis))
@@ -58,25 +63,28 @@
     (let [tests (create-tests)
 	  responses (doall (map #(fire-request client %) tests))
 	  start (start-timestamp)]
-      (println "active players: " (sort (map #(get-in % [:player :name]) tests)))
+      (log "Testing" (count tests) (map #(get-in % [:player :name]) tests))
       (loop [responses responses responded #{}]
 	(let [[finished remaining] (split-by-pred #(c/done? (:response %)) responses)
 	      handled (doall
 		       (for [r finished
 			     :when (not (contains? responded r))]
-			(let [resp (to-response (:response r))]
-			  (player-log (get-in r [:test :player]) "-> %s" resp)
-			  (println (java.util.Date.) " assert-response! " (get-in r [:test :player :name]))
-			  (flush)
-			  (assert-response! (:test r) resp)
-			  r)))]
+			 (let [resp (to-response (:response r))]
+			   (player-log (get-in r [:test :player]) "-> %s" resp)
+			   (assert-response! (:test r) resp)
+			   r)))
+	      responded (reduce conj responded handled)]
 	  (doall remaining)		; force execution
-	  (cond (empty? remaining) 'done
-		(timeout? start) (record-timeout! (map :test remaining))
+	  (cond (empty? remaining) (do
+				     (log "... finished")
+				     'done)
+		(timeout? start) (do
+				   (record-timeout! (map :test remaining))
+				   (recur nil responded))
 		:else
 		(do
 		  (Thread/sleep 100)
-		  (recur remaining (reduce conj responded handled)))))))))
+		  (recur remaining responded))))))))
 
 (defn test-thread-main []
   (reset! *terminate* false)
@@ -90,4 +98,4 @@
 	(when (pos? delay)
 	  (Thread/sleep delay))
 	(when (not (terminate?))
-	(recur))))))
+	  (recur))))))

@@ -18,7 +18,7 @@
 		  (-> s
 		      (assoc :question (question "What is my name"))
 		      (assoc :score 5)
-		      (assoc :penalty -5)))]
+		      (assoc :penalty -2)))]
    (let [parallel-sessions (if (> (correct-answers) 5) 3 1)
 	 wf (workflow [init
 		       resend
@@ -33,14 +33,14 @@
 		  (merge s {:param1 a :param2 b :val1 x :val2 y :op-name op :result result
 			    :expected x :question (question "Let %s be %s. What is %s" a x a)
 			    :score 2
-			    :penalty -2})))
+			    :penalty -1})))
 	  (arg2 [s]
 		(let [{:keys [param2 val2]} s]
 		  (-> s
 		      (assoc :question (question "Let %s be %s. What is %s" param2 val2 param2))
 		      (assoc :expected val2)
 		      (assoc :score 5)
-		      (assoc :penalty -5))))
+		      (assoc :penalty -3))))
 	  (result [s]
 		  (let [{:keys [param1 param2 op-name result]} s]
 		    (-> s
@@ -48,7 +48,7 @@
 			  (question "Remember how much is %s %s %s" param1 op-name param2))
 			(assoc :expected result)
 			(assoc :score 5)
-			(assoc :penalty -4))))]
+			(assoc :penalty -2))))]
     
    (let [corrects (correct-answers)
 	 num-sessions (if (>= corrects 5) 3 1)

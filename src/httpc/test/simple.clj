@@ -16,7 +16,7 @@
      (make-test p
 		(to-question :params {:q (format "How much is %s %s %s" a op-name b)})
 		(assert-content (str (op a b)))
-		:penalty -2))))
+		:penalty -1))))
 
 (defn test-two-numbers-sum [p & args]
   ((create-two-number-aritmetic-test +) p))
@@ -41,7 +41,7 @@
 	       (to-question :params params)
 	       (assert-content result)
 	       :score 4
-	       :penalty -3)))
+	       :penalty -1)))
 
 (defn test-largest-number [p & args]
   (let [n (if (< (correct-answers) 5) 5 10)
@@ -51,7 +51,7 @@
 	       (to-question :params {:q q})
 	       (assert-content (str (apply max ns)))
 	       :score 2
-	       :penalty -3)))
+	       :penalty -1)))
 
 (defn test-nth-fib [p & args]
   (let [n (random-int 10 (if (< (correct-answers) 5) 30 300))
@@ -60,7 +60,7 @@
 	       (to-question :params {:q (format "What is the %sth number in Fibonacci sequence" n)})
 	       (assert-content (str f))
 	       :score 3
-	       :penalty -3)))
+	       :penalty -2)))
 
 (defn test-user-agent [p & args]
   (let [uas ["Mozilla/5.0 Chrome/15.0.872.0 Safari/535.2"
@@ -97,4 +97,4 @@
 			    :headers { "Cookie" (format "%s=%s; %s=%s" a x b y) })
 	       (assert-content result)
 	       :score 5
-	       :penalty -3)))
+	       :penalty -1)))

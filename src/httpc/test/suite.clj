@@ -1,6 +1,7 @@
 (ns httpc.test.suite
   (:use [httpc.player]
 	[httpc.test common simple rest stateful]
+	clojure.set
 	:reload-all)
   (:gen-class))
 
@@ -32,15 +33,29 @@
     (concat suites
 	  [(make-suite "Everything at once" (vec all-tests))])))
 
+(defn- completed-tests-in-suite [p]
+  (count (intersection (set (completed-test-names p))
+		       (set (suite-test-names)))))
+
+(defn- pick-tests-with-treshold [tests num-completed]
+  "Pick tests to use in the round based on the number of tests already completed
+   in current suite."
+  (let [num-tests-to-use (+ 2 (int (* 1.5 num-completed)))]
+    (take num-tests-to-use tests)))
+
 (defn- random-test [p]
   "Pick a random test and set it up for sending to a player.
-   Sends an already completed test in 15% of cases, just to keep the spritis up."
+   Takes into account the number of tests in the suite the user has alread completed and
+   limits the number of unsolved tests in the air at once.
+   Sends an already completed test in 15% of cases, just to keep the spirits up."
   (let [all-completed-tests (completed-test-names p)
+	has-completed-any (seq all-completed-tests)
 	suite (deref *suite*)
-	tests (if (and (seq all-completed-tests)
+	completed-in-suite (completed-tests-in-suite p)
+	tests (if (and has-completed-any
 		       (< (rand) 0.15))
 		(vals (select-keys (all-tests) all-completed-tests))
-		(:tests suite))
+		(pick-tests-with-treshold (:tests suite) completed-in-suite))
 	test-fn (rand-nth tests)]
    (setup-test test-fn p)))
 

@@ -1,5 +1,6 @@
 (ns httpc.player
   (:import java.io.File)
+  (:use httpc.log)
   (:gen-class))
 
 (def *max-log-items* 20)
@@ -82,7 +83,8 @@
 
 (defn record-timeout! [resps]
   (doseq [r resps]
-    (record-event! (:player r) (make-log-event {:status :timeout :msg "Request timed out"}))))
+    (record-event! (:player r) (make-log-event {:status :timeout :msg "Request timed out"}))
+    (player-log (:player r) "Timed out")))
 
 (defn- set-all-attrs [attr val]
   (fn [ps]

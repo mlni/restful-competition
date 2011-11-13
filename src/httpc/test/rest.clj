@@ -123,7 +123,7 @@
 			      :path path
 			      :json json
 			      :score 4
-			      :penalty -3})))
+			      :penalty -2})))
 	  (put-xml [s]
 		   (let [xml (str "<root><data>" (:content s) "</data></root>")]
 		     (merge s
