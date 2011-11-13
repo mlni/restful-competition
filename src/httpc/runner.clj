@@ -63,7 +63,7 @@
     (let [tests (create-tests)
 	  responses (doall (map #(fire-request client %) tests))
 	  start (start-timestamp)]
-      (log "Testing" (count tests) (map #(get-in % [:player :name]) tests))
+      (log "Testing" (count tests) (sort (map #(get-in % [:player :name]) tests)))
       (loop [responses responses responded #{}]
 	(let [[finished remaining] (split-by-pred #(c/done? (:response %)) responses)
 	      handled (doall
