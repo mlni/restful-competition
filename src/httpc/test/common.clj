@@ -101,19 +101,36 @@
 		     (* 10 base-score)
 		     base-score)
 	base-penalty (or (get test :penalty) -1)
-	test-penalty (if (>= (correct-answers) 2) (* 10 base-penalty) base-penalty)]
+	test-penalty (if (>= (correct-answers) 2) (* 10 base-penalty) base-penalty)
+	bonus-score (or (get test :bonus-score) 0)]
     (merge result {:test-score test-score
-		   :test-penalty test-penalty})))
+		   :test-penalty test-penalty
+		   :bonus-score bonus-score})))
+
+(defn- maybe-add-bonus-question [test]
+  (if (< (rand) 0.04)
+    (-> test
+	(assoc-in [:request :headers "X-The-Ultimate-Question"]
+		  "What is the answer to Question of Life, the Universe and Everything?")
+	(assoc-in [:bonus-answer] "42")
+	(assoc-in [:bonus-score] 42))
+    test))
 
 (defn setup-test [test-fn player]
   (let [test-name (function-name test-fn)
 	test-state (get-in player [:test-state test-name])]
     (binding [*test-name* test-name
 	      *correct-answers* (get-in player [:completed-tests test-name] 0)]
-     (assoc (test-fn player :state test-state :test-name test-name) :name test-name))))
+      (-> player
+	  (test-fn :state test-state :test-name test-name)
+	  (assoc :name test-name)
+	  maybe-add-bonus-question))))
 
 (defn assert-test [test resp]
-  ((:expect test) resp))
+  (if (and (:bonus-answer test)
+	   (content-equals? (:content resp) (:bonus-answer test)))
+    (result :bonus "Bonus!")
+    ((:expect test) resp)))
 
 (defn assert-response! [test resp]
   "Assert the received response against the expected result."

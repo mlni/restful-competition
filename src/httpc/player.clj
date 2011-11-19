@@ -45,6 +45,7 @@
   (case (:status result)
 	:ok (get result :test-score 1)
 	:fail (get result :test-penalty -1)
+	:bonus (get result :bonus-score 1)
 	:error -10
 	:timeout -10
 	0))

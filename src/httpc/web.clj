@@ -157,6 +157,7 @@
 
 (defn- status-icon [status]
   (get {:ok "/img/ok.png"
+	:bonus "/img/bonus.png"
 	:error "/img/error.png"
 	:fail "/img/warn.png"
 	:timeout "/img/error.png"} status))
