@@ -50,18 +50,26 @@
 	headers (merge {"User-Agent" "RESTful Competition/1.0"
 			"X-Bender" (next-bender-fortune)}
 		       (:headers r))]
-    (player-log (:player test) "<- %s %s %s %s" method-name url (:query r) headers)
-    {:test test
-     :response (method client url
-		       :query (:query r) :headers headers :body (:body r)
-		       :timeout (+ 1000 *timeout*))}))
+    (try
+      (player-log (:player test) "<- %s %s %s %s" method-name url (:query r) headers)
+      {:test test
+       :response (method client url
+			 :query (:query r) :headers headers :body (:body r)
+			 :timeout (+ 1000 *timeout*))}
+      (catch Exception e
+	(do
+	  (player-log (:player test) "request failed %s" e)
+	  (log "Exception while firing a request " e)
+	  (.printStackTrace e)
+	  nil)))))
 
 (def split-by-pred (juxt filter remove))
 
 (defn- test-loop! []
   (with-open [client (c/create-client)]
     (let [tests (create-tests)
-	  responses (doall (map #(fire-request client %) tests))
+	  responses (doall (filter identity
+				   (map #(fire-request client %) tests)))
 	  start (start-timestamp)]
       (log "Testing" (count tests) (sort (map #(get-in % [:player :name]) tests)))
       (loop [responses responses responded #{}]

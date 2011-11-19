@@ -144,13 +144,15 @@
 (defn do-register [name url]
   (if (and (non-blank? name)
 	   (non-blank? url))
-    (if (not (looks-like-url? url))
-      (register-page name url "Please fill in a valid url")
-      (if (not (player-exists? name))
-	(do
-	  (add-player! name url)
-	  (response/redirect "/"))
-	(register-page name url "Name already exists")))
+    (let [name (.trim name)
+	  url (.trim url)]
+     (if (not (looks-like-url? url))
+       (register-page name url "Please fill in a valid url")
+       (if (not (player-exists? name))
+	 (do
+	   (add-player! name url)
+	   (response/redirect "/"))
+	 (register-page name url "Name already exists"))))
     (register-page name url "Please fill in team name and server url")))
 
 (defn- status-icon [status]
