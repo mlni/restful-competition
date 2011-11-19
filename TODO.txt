@@ -54,10 +54,13 @@ Suites:
 - Which number is the largest
 - What is the nth number in Fibonacci sequence
 - How much is a [+*-] b, a & b in request params
-3. Basic HTTP
+3.Basic HTTP
 - User Agent test
 - Referer
 - How much is a + b, a and b in cookies
 4. Stateful test (kui jõuab nii kaugele)
 - Restful crud: PUT/GET/DELETE/GET /resource/foo1
 - Restful crud with Range headers
+
+Known bugs
+* illegal url makes the test loop to die with a stack

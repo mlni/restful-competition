@@ -19,12 +19,20 @@
 		 cookies)))
 
 (defn- parse-cookie-header [cookies]
-  (let [cookies (if (sequential? cookies) cookies [cookies])]
-    (reduce (fn [r [k v]] (assoc r k v))
-	    {}
-	    (map (fn [p] (let [name-value (first (.split p ";"))]
-			   (take 2 (.split name-value "="))))
-		 cookies))))
+  (letfn [(cookie-key-value-pairs [p]
+				  (let [name-value (first (.split p ";"))
+					name (first (.split name-value "="))
+					value (subs name-value (inc (count name)))]
+				    [name value]))
+	  (collect-non-empty [result [key val]]
+			     (if val
+			       (assoc result key val)
+			       result))]
+   (let [cookies (if (sequential? cookies) cookies [cookies])]
+     (reduce collect-non-empty
+	     {}
+	     (map cookie-key-value-pairs
+		  cookies)))))
 
 (defn- calculate-next-state [next sessions sid]
   (if (nil? next)
