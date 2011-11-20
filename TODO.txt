@@ -1,49 +1,16 @@
 * add the rest of restful tests
-* add per test scores
 * track number of questions asked/correctly answered per player per suite
 * refactor rest tests and session tests to use common core
-* add incremental test addition within suite
-* make score calculation take number of correct answers into account
-
-* make arithm tests incrementally harder
-
+* prefill url with users ip address when registering
 * deactivation of passive users?
 * support redirects?
 
-
 exercises:
 
-+ cookie test. how much is a + b with a and b being cookies
-* session test. how much is a + b with a and b being provided in previous requests
 * etag & if-modified-since/if-none-match headers and REST
-+ Referer header
 * http HEAD with rest resource
-* accept: header and different content representations
-
-rest
-* content type check
-* Range header
-
-+ truncate player log
-+ switching of test suites
-+ reset scores after 0-th round
-+ auto-reloading of scores pages
-+ kicking users
-+ graphing of points
-* refactor tests out of test support and testrunner
-* implement arithmetic tests
-* test display of IO exceptions
-* add support for stateful tests
-* protect poller thread against exception
-* replace players atom with ref as it is modified from multiple threads
-* add session test
-* show whether the user has answered all tests in the current suite
-* refactor state machines to be implicit
-* per user request delays
-* make Range and Fibo tests incrementally harder
-* make restful resource random
-* add proper logging
-
+* hexadecimal numbers
+* set intersection/difference
 
 
 Suites:
@@ -62,5 +29,3 @@ Suites:
 - Restful crud: PUT/GET/DELETE/GET /resource/foo1
 - Restful crud with Range headers
 
-Known bugs
-* illegal url makes the test loop to die with a stack

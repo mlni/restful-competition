@@ -30,6 +30,9 @@
     (catch Exception e
       false)))
 
+(defn- is-localhost-url? [url]
+  (.startsWith url "http://localhost"))
+
 (defn- format-time [ts]
   (.format (java.text.SimpleDateFormat. "HH:mm:ss")
 	   (java.util.Date. ts)))
@@ -148,11 +151,13 @@
 	  url (.trim url)]
      (if (not (looks-like-url? url))
        (register-page name url "Please fill in a valid url")
-       (if (not (player-exists? name))
-	 (do
-	   (add-player! name url)
-	   (response/redirect "/"))
-	 (register-page name url "Name already exists"))))
+       (if (is-localhost-url? url)
+	 (register-page name url "Use your external IP instead of 'localhost'")
+	 (if (not (player-exists? name))
+	   (do
+	     (add-player! name url)
+	     (response/redirect "/"))
+	   (register-page name url "Name already exists")))))
     (register-page name url "Please fill in team name and server url")))
 
 (defn- status-icon [status]
@@ -290,7 +295,7 @@
 (defroutes public-routes
   (GET "/" [] (index-page))
   (GET "/scores" {h :headers} (scores-fragment h))
-  (GET "/register" [] (register-page))
+  (GET "/register" {remote-addr :remote-addr} (register-page "" (str "http://" remote-addr "/")))
   (POST "/register" {params :params} (do-register (params :name) (params :url)))
   (GET "/player/:id" {params :params} (player-page (params :id)))
   (GET "/player/:id/scores" {params :params} (player-scores-fragment (params :id))))
