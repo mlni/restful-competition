@@ -1,7 +1,8 @@
 (ns httpc.test.simple
   (:use httpc.test.common
 	[clojure.contrib.str-utils :only [str-join]]
-	[clojure.contrib.lazy-seqs]))
+	[clojure.contrib.lazy-seqs]
+	[clojure.contrib.math :only [gcd]]))
 
 (defn test-your-name [& args]
   (make-test (to-question :params {:q "What is your name?"})
@@ -76,6 +77,13 @@
 	       (assert-content r)
 	       :score 3
 	       :penalty -2)))
+
+(defn test-greatest-common-divisors [& args]
+  (let [[x y] (random-ints 2 3 (if (< (correct-answers) 5) 30 1000000))
+	r (gcd x y)]
+    (make-test (to-question :params {:q (format "What is the greatest common divisor of %s and %s"
+						x y)})
+	       (assert-content r))))
 
 (defn test-user-agent [& args]
   (let [uas ["Mozilla/5.0 Chrome/15.0.872.0 Safari/535.2"

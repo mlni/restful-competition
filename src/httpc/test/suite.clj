@@ -94,7 +94,8 @@
 			   test-arithmetic-with-session])
    (make-suite "New tests" [; test-two-number-sum-hex
 			    ; test-two-number-mul-hex
-			    test-nth-factorial])
+			    ; test-nth-factorial
+			    test-greatest-common-divisors])
    (make-suite "Rest" [test-restful-resource
 		       test-content-types])))
 

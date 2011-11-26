@@ -1,4 +1,4 @@
-import sys, cgi, re, operator, random
+import sys, cgi, re, operator, random, fractions
 from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 
 REST_STATE = {}
@@ -117,6 +117,12 @@ def factorial(q):
     print "Factorial on %s = %s" % (n, r)
     return r
 
+def gcd(q):
+    m = re.search("What is the greatest common divisor of ([0-9]+) and ([0-9]+)", q)
+    x = int(m.group(1))
+    y = int(m.group(2))
+    return fractions.gcd(x, y)
+
 def referer(h):
     ref = h.get("Referer")
     return ref
@@ -160,6 +166,8 @@ def solve(params, headers):
         result = arithm_hex(q)
     elif re.search("What is the factorial of [0-9]+", q):
         result = factorial(q)
+    elif re.search("What is the greatest common divisor of .*", q):
+        result = gcd(q)
     elif q.find("Which page am I coming from") != -1:
         result = referer(headers)
     elif q.find("My name is") != -1:
