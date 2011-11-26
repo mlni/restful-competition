@@ -69,6 +69,14 @@
 	       :score 3
 	       :penalty -2)))
 
+(defn test-nth-factorial [& args]
+  (let [n (random-int 3 (if (< (correct-answers) 5) 11 30))
+	r (apply * (range 1 (inc n)))]
+    (make-test (to-question :params {:q (format "What is the factorial of %s" n)})
+	       (assert-content r)
+	       :score 3
+	       :penalty -2)))
+
 (defn test-user-agent [& args]
   (let [uas ["Mozilla/5.0 Chrome/15.0.872.0 Safari/535.2"
 	     "Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0"

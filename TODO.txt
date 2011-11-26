@@ -7,12 +7,13 @@ exercises:
 
 * etag & if-modified-since/if-none-match headers and REST
 * http HEAD with rest resource
-* hexadecimal numbers
 * set intersection/difference
+
 * What is the sum of x, y, z...
 * What is the product/square/sqrt of x [,y,z...]
 * Which of the numbers is second largest/smallest: ...
 * How much is 6 or 2 / xor/and
+
 * What is the greatest common divisor of x and y
 * What is the nth factorial
 * Which of the following dates is earliest: 14.09.1979 (1979-09-14)
@@ -46,3 +47,4 @@ Suites:
 
 ToDone
 * prefill url with users ip address when registering
++ hexadecimal numbers

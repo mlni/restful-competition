@@ -108,6 +108,15 @@ def arithm_hex(q):
     print "%s %s %s = %s (%s)" % (x, m.group(2), y, r, hex(r))
     return hex(r)
 
+def factorial(q):
+    n = re.search("What is the factorial of ([0-9]+)", q).group(1)
+    n = int(n)
+    r = 1
+    for i in range(1, n+1):
+        r *= i
+    print "Factorial on %s = %s" % (n, r)
+    return r
+
 def referer(h):
     ref = h.get("Referer")
     return ref
@@ -149,6 +158,8 @@ def solve(params, headers):
         result = arithm(q)
     elif re.search("How much is 0x[0-9a-h]+ [\+*/-] 0x[0-9a-h]+", q):
         result = arithm_hex(q)
+    elif re.search("What is the factorial of [0-9]+", q):
+        result = factorial(q)
     elif q.find("Which page am I coming from") != -1:
         result = referer(headers)
     elif q.find("My name is") != -1:
