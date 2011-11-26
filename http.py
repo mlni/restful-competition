@@ -1,4 +1,4 @@
-import sys, cgi, re, operator, random, fractions
+import sys, cgi, re, operator, random, fractions, time
 from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 
 REST_STATE = {}
@@ -123,6 +123,17 @@ def gcd(q):
     y = int(m.group(2))
     return fractions.gcd(x, y)
 
+def days_between(q):
+    def parse(d):
+        return time.mktime(time.strptime(d, "%d.%m.%Y"))
+    m = re.search("How many days are between ([0-9\.]+) and ([0-9\.]+)", q)
+    d1 = parse(m.group(1))
+    d2 = parse(m.group(2))
+    r = abs(int(round(d1 - d2) / (24 * 60 * 60)))
+    print "Days between %s and %s = %s" % (d1, d2, r)
+    return r
+
+
 def referer(h):
     ref = h.get("Referer")
     return ref
@@ -209,6 +220,8 @@ def solve(params, headers):
         n = re.search(" ([0-9]+)th number in Fibonacci", q).group(1)
         result = fib(int(n))
         print "fibonacci: %s = %s" % (n, result)
+    elif q.find("How many days are between") != -1:
+        result = days_between(q)
     elif q.find("What is my user agent") != -1:
         result = headers.get("User-Agent")
     elif q.find("Which browser am I using") != -1:

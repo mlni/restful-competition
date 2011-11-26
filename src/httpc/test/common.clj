@@ -27,6 +27,9 @@
    :method method
    :body body})
 
+(defn complicate [from to]
+  (if (< (correct-answers) 5) from to))
+
 (defn function-name [f]
   (str (:name (meta f))))
 

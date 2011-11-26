@@ -1,6 +1,6 @@
 (ns httpc.test.suite
   (:use [httpc.player]
-	[httpc.test common simple rest stateful]
+	[httpc.test common simple dates rest stateful]
 	clojure.set
 	:reload-all)
   (:gen-class))
@@ -95,7 +95,8 @@
    (make-suite "New tests" [; test-two-number-sum-hex
 			    ; test-two-number-mul-hex
 			    ; test-nth-factorial
-			    test-greatest-common-divisors])
+			    ; test-greatest-common-divisors
+			    test-days-between])
    (make-suite "Rest" [test-restful-resource
 		       test-content-types])))
 

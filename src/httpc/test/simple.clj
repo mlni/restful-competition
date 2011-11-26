@@ -19,9 +19,6 @@
 		 (assert-content (str (converter (op a b))))
 		 :penalty -1))))
 
-(defn- complicate [from to]
-  (if (< (correct-answers) 5) from to))
-
 (defn test-two-numbers-sum [& args]
   ((create-two-number-aritmetic-test +)))
 (defn test-two-numbers-subtract [& args]
