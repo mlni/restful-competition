@@ -3,97 +3,88 @@
 	[clojure.contrib.str-utils :only [str-join]]
 	[clojure.contrib.lazy-seqs]))
 
-(defn test-your-name [p & args]
-  (make-test p
-	     (to-question :params {:q "What is your name?"})
-	     (assert-content (:name p))))
+(defn test-your-name [& args]
+  (make-test (to-question :params {:q "What is your name?"})
+	     (assert-content (:name (current-player)))))
 
 (defn- create-two-number-aritmetic-test [op]
   "Test arithmetic with two random numbers and a random operation (+, - or *)"
-  (fn [p & args]
+  (fn [& args]
    (let [[a b] (random-ints 2 1 (if (< (correct-answers) 5) 20 20000))
 	 op-name (function-name op)]
-     (make-test p
-		(to-question :params {:q (format "How much is %s %s %s" a op-name b)})
+     (make-test (to-question :params {:q (format "How much is %s %s %s" a op-name b)})
 		(assert-content (str (op a b)))
 		:penalty -1))))
 
-(defn test-two-numbers-sum [p & args]
-  ((create-two-number-aritmetic-test +) p))
-(defn test-two-numbers-subtract [p & args]
-  ((create-two-number-aritmetic-test -) p))
-(defn test-two-numbers-multiply [p & args]
-  ((create-two-number-aritmetic-test *) p))
+(defn test-two-numbers-sum [& args]
+  ((create-two-number-aritmetic-test +)))
+(defn test-two-numbers-subtract [& args]
+  ((create-two-number-aritmetic-test -)))
+(defn test-two-numbers-multiply [& args]
+  ((create-two-number-aritmetic-test *)))
 
-(defn test-two-numbers-division [p & args]
+(defn test-two-numbers-division [& args]
   (let [[a b] (random-ints 2 1 20)
 	x (* a b)]
-    (make-test p
-	       (to-question :params {:q (format "How much is %s / %s" x a)})
+    (make-test (to-question :params {:q (format "How much is %s / %s" x a)})
 	       (assert-content b))))
 
-(defn test-arithmetic-with-params [p & args]
+(defn test-arithmetic-with-params [& args]
   (let [{:keys [x y a b op result]} (create-arithmetic-testcase [+ - *])
 	params {:q (format "How much is %s %s %s" a op b)
 		a x
 		b y}]
-    (make-test p
-	       (to-question :params params)
+    (make-test (to-question :params params)
 	       (assert-content result)
 	       :score 4
 	       :penalty -1)))
 
-(defn test-largest-number [p & args]
+(defn test-largest-number [& args]
   (let [n (if (< (correct-answers) 5) 5 10)
 	ns (random-ints n 1 1000)
 	q (str "Which of the numbers is largest: " (str-join ", " ns))]
-    (make-test p
-	       (to-question :params {:q q})
+    (make-test (to-question :params {:q q})
 	       (assert-content (str (apply max ns)))
 	       :score 2
 	       :penalty -1)))
 
-(defn test-nth-fib [p & args]
+(defn test-nth-fib [& args]
   (let [n (random-int 10 (if (< (correct-answers) 5) 30 300))
 	f (nth (fibs) n)]
-    (make-test p
-	       (to-question :params {:q (format "What is the %sth number in Fibonacci sequence" n)})
+    (make-test (to-question :params {:q (format "What is the %sth number in Fibonacci sequence" n)})
 	       (assert-content (str f))
 	       :score 3
 	       :penalty -2)))
 
-(defn test-user-agent [p & args]
+(defn test-user-agent [& args]
   (let [uas ["Mozilla/5.0 Chrome/15.0.872.0 Safari/535.2"
 	     "Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0"
 	     "Mozilla/5.0 (X11; Linux i686; rv:6.0) Gecko/20100101 Firefox/6.0"
 	     "Mozilla/5.0 (X11; en-US; rv:1.9.2.8) Gecko/20101230 Firefox/3.6.8"
 	     "Googlebot/2.1 (+http://www.googlebot.com/bot.html)"]
 	ua (if (< (correct-answers) 5) (first uas) (rand-nth uas))]
-    (make-test p
-	       (to-question :params {:q "Which browser am I using"}
+    (make-test (to-question :params {:q "Which browser am I using"}
 			    :headers {"User-Agent" ua})
 	       (assert-content ua)
 	       :score 3
 	       :penalty -2)))
 
-(defn test-referer [p & args]
+(defn test-referer [& args]
   (let [refs ["http://webmedia.eu/company/jobs/"
 	      "http://www.google.com/search?q=worst%20game%20ever"
 	      "http://en.wikipedia.org/wiki/Representational_state_transfer"
 	      "http://imgur.com/gallery/SkeSE"]
 	rnd-ref (if (< (correct-answers) 5) (first refs) (rand-nth refs))]
-    (make-test p
-	       (to-question :params {:q "Which page am I coming from"}
+    (make-test (to-question :params {:q "Which page am I coming from"}
 			    :headers {"Referer" rnd-ref})
 	       (assert-content rnd-ref)
 	       :score 3
 	       :penalty -2)))
 
-(defn test-cookies [p & args]
+(defn test-cookies [& args]
   (let [{:keys [x y a b op result]} (create-arithmetic-testcase [+ - *])
 	params {:q (format "How much is %s %s %s" a op b)}]
-    (make-test p
-	       (to-question :params params
+    (make-test (to-question :params params
 			    :headers { "Cookie" (format "%s=%s; %s=%s" a x b y) })
 	       (assert-content result)
 	       :score 5

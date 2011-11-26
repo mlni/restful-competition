@@ -5,7 +5,7 @@
 (defn- question [fmt & args]
   (apply format (concat [fmt] args)))
 
-(defn test-my-name-session [p & {sessions :state}]
+(defn test-my-name-session [& {sessions :state}]
   "Remember my name"
   (letfn [(init [s]
 		(let [name (rand-nth ["Matti" "Bill" "Bob" "John" "Steve"
@@ -23,10 +23,10 @@
 	 wf (workflow [init
 		       resend
 		       resend])]
-     (session-testcase p sessions wf parallel-sessions))))
+     (session-testcase sessions wf parallel-sessions))))
 
 
-(defn test-arithmetic-with-session [p & {sessions :state}]
+(defn test-arithmetic-with-session [& {sessions :state}]
   "Remember values of parameters and calculate the value of an arithmetic expression"
   (letfn [(init [s]
 		(let [{:keys [x y a b op result]} (create-arithmetic-testcase [* - +])]
@@ -49,10 +49,9 @@
 			(assoc :expected result)
 			(assoc :score 5)
 			(assoc :penalty -2))))]
-    
    (let [corrects (correct-answers)
 	 num-sessions (if (>= corrects 5) 3 1)
 	 wf (workflow [init
 		       arg2
 		       result])]
-     (session-testcase p sessions wf num-sessions))))
+     (session-testcase sessions wf num-sessions))))

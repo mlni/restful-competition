@@ -19,12 +19,11 @@
 		   [this [test-fn assert-fn next]])
 		 keys fn-pairs))))
 
-(defn- multistep-testcase [p session workflow]
+(defn- multistep-testcase [session workflow]
   (let [current-state (:state session)
 	[test-fn assert-fn next-state] ((construct-statemachine workflow) current-state)
 	next (-> session test-fn (assoc :state next-state))]
-    (make-test p
-	       (:question next)
+    (make-test (:question next)
 	       (assert-fn next)
 	       :next-state (update-state-on-success next)
 	       :score (:score session)
@@ -97,7 +96,7 @@
 		       (respond-correct)
 		       (respond-fail)))))))
 
-(defn test-restful-resource [p & {session :state}]
+(defn test-restful-resource [& {session :state}]
   "Test PUT/GET/DELETE cycle of a resource"
   (let [workflow (concat [[put-resource expect-success]
 			  [get-resource expect-content]]
@@ -105,10 +104,10 @@
 			   [[get-partial-resource expect-partial-content]])
 			 [[delete-resource expect-success]
 			  [get-resource expect-not-found]])]
-    (multistep-testcase p session workflow)))
+    (multistep-testcase session workflow)))
 
 
-(defn test-content-types [p & {session :state}]
+(defn test-content-types [& {session :state}]
   (letfn [(put-json [s]
 		    (let [resources (map #(str "foo" %1) (range 2 21 2))
 			  path (str "/resource/" (rand-nth resources))
@@ -157,4 +156,4 @@
 	      [get-json expect-json]
 	      [get-xml expect-xml]
 	      [delete-resource expect-success]]]
-      (multistep-testcase p session wf))))
+      (multistep-testcase session wf))))

@@ -3,10 +3,20 @@
 	clojure.pprint)
   (:gen-class))
 
-(defn make-test [player request expectation & {:as kv-pairs}]
+
+(def *current-player*)
+(def *correct-answers*)
+(def *test-name*)
+
+(defn current-player [] *current-player*)
+(defn correct-answers [] *correct-answers*)
+(defn test-name [] *test-name*)
+
+
+(defn make-test [request expectation & {:as kv-pairs}]
   (merge {:final true}
 	 (merge kv-pairs
-		{:player player
+		{:player (current-player)
 		 :request request
 		 :expect expectation})))
 
@@ -76,19 +86,6 @@
 		   (respond-correct)
 		   (respond-fail)))))
 
-(def *current-player*)
-(def *correct-answers*)
-(def *test-name*)
-
-(defn current-player []
-  *current-player*)
-
-(defn correct-answers []
-  *correct-answers*)
-
-(defn test-name []
-  *test-name*)
-
 (defn count-completed-tests [player test-names]
   (count (filter (fn [name] (pos? (get-in player [:completed-tests name] 0)))
 		 test-names)))
@@ -126,8 +123,7 @@
     (binding [*current-player* player
 	      *test-name* test-name
 	      *correct-answers* (get-in player [:completed-tests test-name] 0)]
-      (-> player
-	  (test-fn :state test-state :test-name test-name)
+      (-> (test-fn :state test-state :test-name test-name)
 	  (assoc :name test-name)
 	  maybe-add-bonus-question))))
 
