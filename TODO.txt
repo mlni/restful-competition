@@ -1,9 +1,7 @@
 * add the rest of restful tests
 * track number of questions asked/correctly answered per player per suite
 * refactor rest tests and session tests to use common core
-* prefill url with users ip address when registering
-* deactivation of passive users?
-* support redirects?
+* fix ConnectException revealing questions
 
 exercises:
 
@@ -11,6 +9,23 @@ exercises:
 * http HEAD with rest resource
 * hexadecimal numbers
 * set intersection/difference
+* What is the sum of x, y, z...
+* What is the product/square/sqrt of x [,y,z...]
+* Which of the numbers is second largest/smallest: ...
+* How much is 6 or 2 / xor/and
+* What is the greatest common divisor of x and y
+* What is the nth factorial
+* Which of the following dates is earliest: 14.09.1979 (1979-09-14)
+* What is the weekday of 14.09.1979 (1979-09-14)
+* How many days are between 14.09.1979 and 01.12.2011
+* Multistep:
+  - John is 178 cm tall. How tall is he in inches
+  - Bill is 6' 10". How tall is he in cm
+  - Which of them is taller
+* Multistep
+  - Ford drives at 78 kmh. How many miles per hour is that
+  - Opel drives at 60 mph. How many km per hour does it drive
+  - Which of them drives faster
 
 
 Suites:
@@ -29,3 +44,5 @@ Suites:
 - Restful crud: PUT/GET/DELETE/GET /resource/foo1
 - Restful crud with Range headers
 
+ToDone
+* prefill url with users ip address when registering

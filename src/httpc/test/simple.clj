@@ -7,14 +7,16 @@
   (make-test (to-question :params {:q "What is your name?"})
 	     (assert-content (:name (current-player)))))
 
-(defn- create-two-number-aritmetic-test [op]
+(defn- create-two-number-aritmetic-test [op & {convert :convert}]
   "Test arithmetic with two random numbers and a random operation (+, - or *)"
   (fn [& args]
-   (let [[a b] (random-ints 2 1 (if (< (correct-answers) 5) 20 20000))
-	 op-name (function-name op)]
-     (make-test (to-question :params {:q (format "How much is %s %s %s" a op-name b)})
-		(assert-content (str (op a b)))
-		:penalty -1))))
+    (let [[a b] (random-ints 2 1 (if (< (correct-answers) 5) 20 20000))
+	  converter (or convert identity)
+	  op-name (function-name op)]
+      (make-test (to-question :params {:q (format "How much is %s %s %s" (converter a)
+						  op-name (converter b))})
+		 (assert-content (str (converter (op a b))))
+		 :penalty -1))))
 
 (defn test-two-numbers-sum [& args]
   ((create-two-number-aritmetic-test +)))
@@ -22,6 +24,17 @@
   ((create-two-number-aritmetic-test -)))
 (defn test-two-numbers-multiply [& args]
   ((create-two-number-aritmetic-test *)))
+
+(defn- to-hex [i]
+  (str "0x" (Integer/toHexString i)))
+
+(defn test-two-number-sum-hex [& args]
+  ((create-two-number-aritmetic-test + :convert to-hex)))
+(defn test-two-number-mul-hex [& args]
+  ((create-two-number-aritmetic-test * :convert to-hex)))
+(defn test-two-number-subtract-hex [& args]
+  ((create-two-number-aritmetic-test - :convert to-hex)))
+
 
 (defn test-two-numbers-division [& args]
   (let [[a b] (random-ints 2 1 20)

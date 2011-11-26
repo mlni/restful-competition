@@ -92,6 +92,8 @@
 			     test-cookies])
    (make-suite "Sessions" [test-my-name-session
 			   test-arithmetic-with-session])
+   (make-suite "New tests" [test-two-number-sum-hex
+			    test-two-number-mul-hex])
    (make-suite "Rest" [test-restful-resource
 		       test-content-types])))
 

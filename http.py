@@ -83,6 +83,7 @@ def largest_number(q):
     return max(nums)
 
 def arithm_params(q, params, cookies):
+    print "arithm params"
     ops = { "+": operator.add, "-": operator.sub, "*": operator.mul }
     m = re.search("is ([a-z]+) ([\+*/-]) ([a-z]+)", q)
     print cookies
@@ -93,9 +94,19 @@ def arithm_params(q, params, cookies):
     return ops[m.group(2)](p1, p2)
 
 def arithm(q):
+    print "arithm plain"
     ops = { "+": operator.add, "-": operator.sub, "*": operator.mul, "/": operator.div }
     m = re.search("is ([0-9]+) ([\+*/-]) ([0-9]+)", q)
     return ops[m.group(2)](int(m.group(1)), int(m.group(3)))
+
+def arithm_hex(q):
+    ops = { "+": operator.add, "-": operator.sub, "*": operator.mul, "/": operator.div }
+    m = re.search("is ([0-9a-z]+) ([\+*/-]) ([0-9a-z]+)", q)
+    x = int(m.group(1), 16)
+    y = int(m.group(3), 16)
+    r = ops[m.group(2)](x, y)
+    print "%s %s %s = %s (%s)" % (x, m.group(2), y, r, hex(r))
+    return hex(r)
 
 def referer(h):
     ref = h.get("Referer")
@@ -136,6 +147,8 @@ def solve(params, headers):
         result = arithm_params(q, params, cookies)
     elif re.search("How much is [0-9]+ [\+*/-] [0-9]+", q):
         result = arithm(q)
+    elif re.search("How much is 0x[0-9a-h]+ [\+*/-] 0x[0-9a-h]+", q):
+        result = arithm_hex(q)
     elif q.find("Which page am I coming from") != -1:
         result = referer(headers)
     elif q.find("My name is") != -1:
@@ -181,6 +194,8 @@ def solve(params, headers):
         result = headers.get("User-Agent")
     elif q.find("Which browser am I using") != -1:
         result = headers.get("User-Agent")
+    else:
+        print "No match!"
         
     return (out, result)
 
