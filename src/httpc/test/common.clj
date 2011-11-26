@@ -76,8 +76,12 @@
 		   (respond-correct)
 		   (respond-fail)))))
 
+(def *current-player*)
 (def *correct-answers*)
 (def *test-name*)
+
+(defn current-player []
+  *current-player*)
 
 (defn correct-answers []
   *correct-answers*)
@@ -119,7 +123,8 @@
 (defn setup-test [test-fn player]
   (let [test-name (function-name test-fn)
 	test-state (get-in player [:test-state test-name])]
-    (binding [*test-name* test-name
+    (binding [*current-player* player
+	      *test-name* test-name
 	      *correct-answers* (get-in player [:completed-tests test-name] 0)]
       (-> player
 	  (test-fn :state test-state :test-name test-name)
@@ -134,7 +139,8 @@
 
 (defn assert-response! [test resp]
   "Assert the received response against the expected result."
-  (binding [*test-name* (:name test)
+  (binding [*current-player* (:player test)
+	    *test-name* (:name test)
 	    *correct-answers* (get-in test [:player :completed-tests (:name test)] 0)]
    (let [result (assert-test test resp)
 	 log-entry (make-log-event (add-scores result test))]
