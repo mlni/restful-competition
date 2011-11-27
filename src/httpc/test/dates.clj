@@ -2,7 +2,7 @@
   (:use httpc.player
 	[httpc.test common]
 	:reload-all)
-  (:import [java.util Date Calendar]
+  (:import [java.util Date Calendar Locale]
 	   [java.text SimpleDateFormat])
   (:gen-class))
 
@@ -23,7 +23,7 @@
   (.format (SimpleDateFormat. "dd.MM.yyyy") d))
 
 (defn- format-us [d]
-  (.format (SimpleDateFormat. "dd.MM.yyyy") d))
+  (.format (SimpleDateFormat. "yyyy-MM-dd") d))
 
 (defn test-days-between [& args]
   (let [[n1 n2] (random-ints 2 1 5000)
@@ -38,3 +38,11 @@
 						(fmt d2))})
 	       (assert-content r)
 	       :score 2)))
+
+(defn test-weekday-of-a-date [& args]
+  (let [d (days-ago (random-int 100 5000))
+	weekday (.format (SimpleDateFormat. "EEEE" Locale/US) d)
+	fmt (complicate format-ee (rand-nth [format-ee format-us]))]
+    (make-test (to-question :params {:q (format "What was the weekday of %s"
+						(fmt d))})
+	       (assert-content weekday))))

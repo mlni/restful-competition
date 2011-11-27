@@ -96,7 +96,8 @@
 			    ; test-two-number-mul-hex
 			    ; test-nth-factorial
 			    ; test-greatest-common-divisors
-			    test-days-between])
+			    ; test-days-between
+			    test-weekday-of-a-date])
    (make-suite "Rest" [test-restful-resource
 		       test-content-types])))
 
