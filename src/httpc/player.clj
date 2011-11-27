@@ -5,7 +5,7 @@
 
 (def *max-log-items* 20)
 (def *error-delay* (* 20 1000))
-(def *players* (ref {}))
+(defonce *players* (ref {}))
 
 
 (defn generate-random-str [len]
@@ -125,11 +125,3 @@
     (dosync
      (when (contains? @*players* (:id p))
       (alter *players* update-in key f)))))
-
-(defn- init []
-  (dosync
-   (alter *players* {})
-   (doseq [[name url] '[("matti" "http://localhost:4000/")]]
-     (add-player! name url))))
-
-(init)

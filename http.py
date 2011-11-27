@@ -124,36 +124,32 @@ def gcd(q):
     return fractions.gcd(x, y)
 
 def days_between(q):
-    def parse(d):
-        return time.mktime(time.strptime(d, "%d.%m.%Y"))
-    m = re.search("How many days are between ([0-9\.]+) and ([0-9\.]+)", q)
-    d1 = parse(m.group(1))
-    d2 = parse(m.group(2))
+    m = re.search("How many days are between ([0-9\.-]+) and ([0-9\.-]+)", q)
+    d1 = parse_date(m.group(1))
+    d2 = parse_date(m.group(2))
     r = abs(int(round(d1 - d2) / (24 * 60 * 60)))
     print "Days between %s and %s = %s" % (d1, d2, r)
     return r
 
-def weekday(q):
-    m = re.search("What was the weekday of ([0-9]{2}\.[0-9]{2}\.[0-9]{4})", q)
+def parse_date(d):
+    m = re.search("([0-9]{2}\.[0-9]{2}\.[0-9]{4})", d)
     if m:
-        d = time.strptime(m.group(1), "%d.%m.%Y")
+        return time.mktime(time.strptime(m.group(1), "%d.%m.%Y"))
     else:
-        m = re.search("What was the weekday of ([0-9-]+)", q)
-        d = time.strptime(m.group(1), "%Y-%m-%d")
+        m = re.search("([0-9-]+)", d)
+        return time.mktime(time.strptime(m.group(1), "%Y-%m-%d"))
+
+def weekday(q):
+    m = re.search("What was the weekday of ([0-9\.-]+)", q)
+    d = parse_date(m.group(1))
+    d = time.localtime(d)
     return ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][d[6]]
 
 def earliest(q):
-    def parse(d):
-        m = re.search("([0-9]{2}\.[0-9]{2}\.[0-9]{4})", d)
-        if m:
-            return time.mktime(time.strptime(m.group(1), "%d.%m.%Y"))
-        else:
-            m = re.search("([0-9-]+)", d)
-            return time.mktime(time.strptime(m.group(1), "%Y-%m-%d"))
     days = q[q.index(":")+1:].split(", ")
     ds = {}
     for d in days:
-        ds[parse(d.strip())] = d
+        ds[parse_date(d.strip())] = d
     r = sorted(ds.keys())[0]
     print "earliest: %s" % (ds[r])
     return ds[r]
@@ -246,6 +242,39 @@ def solve(params, headers):
         print "Session: ", vals
         ops = { "+": operator.add, "-": operator.sub, "*": operator.mul }
         result = ops[op](vals[n1], vals[n2])
+    elif re.search("\w+ is [0-9'\"]+ tall. How tall is he in centimeters", q):
+        name = q.split()[0]
+
+        m = re.search("([0-9])'", q)
+        feet = int(m.group(1))
+        inches = 0
+        m = re.search('([0-9]+)"', q)
+        if m:
+            inches = int(m.group(1))
+        result = int(round(feet * 12 * 2.54 + inches * 2.54))
+        vals = {result : name}
+        s = sid()
+        SESSIONS[s] = vals
+        out.append(["Set-Cookie", "SID=%s; domain=localhost" % s])
+        print "%s'%s = %s" % (feet, inches, result)
+    elif re.search("\w+ is [0-9]+ cm tall. How tall is he in inches", q):
+        s = sessioncookie(headers)
+        sess = SESSIONS[s]
+
+        name = q.split()[0]
+        m = re.search("([0-9]+) cm", q)
+        cm = int(m.group(1))
+        result = int(round(cm / 2.54))
+        sess[cm] = name
+        SESSIONS[s] = sess
+        print "%s cm = %s inches" % (cm, result)
+    elif q.find("Which of them is taller") != -1:
+        s = sessioncookie(headers)
+        vals = SESSIONS[s]
+        taller = sorted(vals.keys())[-1]
+        result = vals[taller]
+        print "Taller: %s" % result
+        
     elif q.find("Fibonacci") != -1:
         n = re.search(" ([0-9]+)th number in Fibonacci", q).group(1)
         result = fib(int(n))

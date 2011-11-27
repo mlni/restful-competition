@@ -37,7 +37,13 @@
   (+ min (rand-int (- max min))))
 
 (defn random-ints [n min max]
-  (repeatedly n #(random-int min max)))
+  (loop [r [] n n ns #{}]
+    (if (zero? n)
+      r
+      (let [x (random-int min max)]
+	(if (contains? ns x)
+	  (recur r n ns)
+	  (recur (conj r x) (dec n) (conj ns x)))))))
 
 (defn create-arithmetic-testcase [ops]
   (let [[x y] (random-ints 2 1 100)
