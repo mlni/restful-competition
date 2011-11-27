@@ -14,7 +14,6 @@ exercises:
 * Which of the numbers is second largest/smallest: ...
 * How much is 6 or 2 / xor/and
 
-* Which of the following dates is earliest: 14.09.1979 (1979-09-14)
 * Multistep:
   - John is 178 cm tall. How tall is he in inches
   - Bill is 6' 10". How tall is he in cm
@@ -48,3 +47,4 @@ ToDone
 + What is the greatest common divisor of x and y
 + How many days are between 14.09.1979 and 01.12.2011
 + What is the weekday of 14.09.1979 (1979-09-14)
++ Which of the following dates is earliest: 14.09.1979 (1979-09-14)
