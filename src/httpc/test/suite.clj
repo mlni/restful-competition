@@ -97,7 +97,8 @@
 			    ; test-nth-factorial
 			    ; test-greatest-common-divisors
 			    ; test-days-between
-			    test-weekday-of-a-date])
+			    ; test-weekday-of-a-date
+			    test-earliest-date])
    (make-suite "Rest" [test-restful-resource
 		       test-content-types])))
 

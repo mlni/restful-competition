@@ -133,6 +133,30 @@ def days_between(q):
     print "Days between %s and %s = %s" % (d1, d2, r)
     return r
 
+def weekday(q):
+    m = re.search("What was the weekday of ([0-9]{2}\.[0-9]{2}\.[0-9]{4})", q)
+    if m:
+        d = time.strptime(m.group(1), "%d.%m.%Y")
+    else:
+        m = re.search("What was the weekday of ([0-9-]+)", q)
+        d = time.strptime(m.group(1), "%Y-%m-%d")
+    return ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][d[6]]
+
+def earliest(q):
+    def parse(d):
+        m = re.search("([0-9]{2}\.[0-9]{2}\.[0-9]{4})", d)
+        if m:
+            return time.mktime(time.strptime(m.group(1), "%d.%m.%Y"))
+        else:
+            m = re.search("([0-9-]+)", d)
+            return time.mktime(time.strptime(m.group(1), "%Y-%m-%d"))
+    days = q[q.index(":")+1:].split(", ")
+    ds = {}
+    for d in days:
+        ds[parse(d.strip())] = d
+    r = sorted(ds.keys())[0]
+    print "earliest: %s" % (ds[r])
+    return ds[r]
 
 def referer(h):
     ref = h.get("Referer")
@@ -181,6 +205,8 @@ def solve(params, headers):
         result = gcd(q)
     elif q.find("Which page am I coming from") != -1:
         result = referer(headers)
+    elif q.find("What was the weekday of ") != -1:
+        result = weekday(q)
     elif q.find("My name is") != -1:
         name = re.search("My name is (\w+)\.", q).group(1)
         s = sid()
@@ -220,6 +246,8 @@ def solve(params, headers):
         n = re.search(" ([0-9]+)th number in Fibonacci", q).group(1)
         result = fib(int(n))
         print "fibonacci: %s = %s" % (n, result)
+    elif q.find("Which of the following days is the earliest") != -1:
+        result = earliest(q)
     elif q.find("How many days are between") != -1:
         result = days_between(q)
     elif q.find("What is my user agent") != -1:
@@ -233,7 +261,7 @@ def solve(params, headers):
 
 def fib(n):
     a, b = 0, 1
-    for i in range(n - 2):
+    for i in range(n - 1):
         c = a + b
         a, b = b, c
     return c

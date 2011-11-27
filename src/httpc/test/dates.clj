@@ -1,6 +1,7 @@
 (ns httpc.test.dates
   (:use httpc.player
 	[httpc.test common]
+	[clojure.contrib.str-utils :only [str-join]]
 	:reload-all)
   (:import [java.util Date Calendar Locale]
 	   [java.text SimpleDateFormat])
@@ -32,17 +33,24 @@
 	[d1 d2] (complicate (sort [d1 d2]) [d1 d2])
 	fmt (complicate format-ee (rand-nth [format-ee format-us]))
 	r (abs (int (/ (- (.getTime d1) (.getTime d2)) (* 24 60 60 1000))))]
-    (println "days between r " n1 n2 r)
-    (make-test (to-question :params {:q (format "How many days are between %s and %s"
-						(fmt d1)
-						(fmt d2))})
-	       (assert-content r)
-	       :score 2)))
+    (simple-question (format "How many days are between %s and %s"
+			     (fmt d1)
+			     (fmt d2))
+		     r
+		     :score 2)))
 
 (defn test-weekday-of-a-date [& args]
   (let [d (days-ago (random-int 100 5000))
 	weekday (.format (SimpleDateFormat. "EEEE" Locale/US) d)
 	fmt (complicate format-ee (rand-nth [format-ee format-us]))]
-    (make-test (to-question :params {:q (format "What was the weekday of %s"
-						(fmt d))})
-	       (assert-content weekday))))
+    (simple-question (format "What was the weekday of %s"
+			     (fmt d))
+		     weekday)))
+
+(defn test-earliest-date [& args]
+  (let [ns (random-ints 5, 100 5000)
+	days (map days-ago ns)
+	fmt (complicate format-ee (rand-nth [format-ee format-us]))]
+    (simple-question (format "Which of the following days is the earliest: %s"
+			     (str-join ", " (map fmt days)))
+		     (fmt (first (sort days))))))

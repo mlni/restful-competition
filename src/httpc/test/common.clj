@@ -89,6 +89,13 @@
 		   (respond-correct)
 		   (respond-fail)))))
 
+(defn simple-question [question answer & {:as kv-pairs}]
+  (apply make-test (concat
+		    [(to-question :params {:q question})
+		     (assert-content answer)]
+		    (flatten (vec kv-pairs)))))
+
+
 (defn count-completed-tests [player test-names]
   (count (filter (fn [name] (pos? (get-in player [:completed-tests name] 0)))
 		 test-names)))
