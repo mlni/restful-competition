@@ -40,7 +40,8 @@
             .append("<td><div style='width: 20px; background-color: " + colour + "'>&nbsp;</div></td>")
             .append("<td>" + player.score + "</td>")
             .append("<td>" + player.completed + " / " + player.total +
-		    (completed ? " <span class='label success'>OK</span>" : "") + "</td>")
+		    (completed ? " <span class='label success'>OK</span>" : "") +
+		    (player.bonus ? " <span class='label warning'>Bonus</span>" : "") + "</td>")
             .append($("<td/>")
               .append($("<a>Kick</a>")
                 .attr("href", "#")

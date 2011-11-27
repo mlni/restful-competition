@@ -110,6 +110,7 @@
 					:url (:url p)
 					:score (:score p)
 					:completed (count-completed-tests p (suite-test-names))
+					:bonus (:bonus p)
 					:total (count (all-tests-in-suite))}))
 		     [] (players-by-score))]
     (-> (response/response (json-str body))

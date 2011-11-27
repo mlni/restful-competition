@@ -80,7 +80,9 @@
     (alter *players* update-in [(:id player) :log] #(take *max-log-items*
 							  (conj % evt)))
     (when (#{:timeout :error} (:status evt))
-      (alter *players* assoc-in [(:id player) :next-request] (error-timeout))))))
+      (alter *players* assoc-in [(:id player) :next-request] (error-timeout)))
+    (when (= :bonus (:status evt))
+      (alter *players* assoc-in [(:id player) :bonus] true)))))
 
 (defn record-timeout! [resps]
   (doseq [r resps]

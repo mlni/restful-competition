@@ -188,9 +188,13 @@ def solve(params, headers):
         for p in pcs:
             k, v = p.split("=")
             cookies[k.strip()] = v.strip()
-    
+
     q = params["q"][0]
-    if q.find("largest") != -1:
+
+    if "X-The-Ultimate-Question" in headers:
+        print "Ultimate question"
+        result = "42"
+    elif q.find("largest") != -1:
         # Which of the numbers is largest: 841, 973, 279, 146, 923
         result = largest_number(q)
     elif re.search("How much is [a-z] [\+*/-] [a-z]", q):
