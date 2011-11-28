@@ -11,13 +11,8 @@ exercises:
 
 * What is the sum of x, y, z...
 * What is the product/square/sqrt of x [,y,z...]
-* Which of the numbers is second largest/smallest: ...
 * How much is 6 or 2 / xor/and
 
-* Multistep:
-  - John is 178 cm tall. How tall is he in inches
-  - Bill is 6' 10". How tall is he in cm
-  - Which of them is taller
 * Multistep
   - Ford drives at 78 kmh. How many miles per hour is that
   - Opel drives at 60 mph. How many km per hour does it drive
@@ -42,9 +37,15 @@ Suites:
 
 ToDone
 + prefill url with users ip address when registering
++ dont display full url on connection exception
 + hexadecimal numbers
 + What is the nth factorial
 + What is the greatest common divisor of x and y
 + How many days are between 14.09.1979 and 01.12.2011
 + What is the weekday of 14.09.1979 (1979-09-14)
 + Which of the following dates is earliest: 14.09.1979 (1979-09-14)
++ Multistep:
+  - John is 178 cm tall. How tall is he in inches
+  - Bill is 6' 10". How tall is he in cm
+  - Which of them is taller
++ Which of the numbers is second largest/smallest: ...

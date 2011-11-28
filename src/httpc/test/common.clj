@@ -81,9 +81,13 @@
   ([] (result [:timeout "Request timed out"])))
 
 (defn on-success [resp pred]
-  (cond (:error resp) (if (.startsWith (str (:error resp)) "java.util.concurrent.TimeoutException")
-			(respond-timeout)
-			(respond-error (:error resp)))
+  (cond (:error resp)
+	(let [msg (str (:error resp))]
+	  (if (.startsWith msg "java.util.concurrent.TimeoutException")
+	    (respond-timeout)
+	    (if (.startsWith msg "java.net.ConnectException")
+	      (respond-error "Connection refused")
+	      (respond-error (:error resp)))))
 	(is-non-positive-code? (:code (:status resp))) (respond-error)
 	(map? pred) pred
 	:else (pred)))

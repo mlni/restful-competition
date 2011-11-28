@@ -100,6 +100,7 @@
 			    test-weekday-of-a-date
 			    test-earliest-date
 			    test-who-is-taller])
+   (make-suite "Dev" [test-second-largest-number])
    (make-suite "Rest" [test-restful-resource
 		       test-content-types])))
 

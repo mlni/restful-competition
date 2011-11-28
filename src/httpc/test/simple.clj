@@ -62,6 +62,13 @@
 		     :score 2
 		     :penalty -1)))
 
+(defn test-second-largest-number [& args]
+  (let [ns (random-ints 5 1 1000)
+	ans (second (sort ns))
+	fmt (complicate identity (rand-nth [identity to-hex]))]
+    (simple-question (str "Which of the numbers is second largest: " (str-join ", " (map fmt ns)))
+		     (fmt ans))))
+
 (defn test-nth-fib [& args]
   (let [n (random-int 10 (complicate 30 300))
 	f (nth (fibs) n)]

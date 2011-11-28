@@ -82,6 +82,14 @@ def largest_number(q):
     nums = [int(x) for x in q[q.index(":") + 1:].split(", ")]
     return max(nums)
 
+def second_largest_number(q):
+    nums = {}
+    for x in q[q.index(":") + 1:].split(", "):
+        nums[int(x, 16)] = x
+    r = sorted(nums.keys())[1]
+    print "second largest: %s - %s" % (nums, nums[r])
+    return nums[r]
+
 def arithm_params(q, params, cookies):
     print "arithm params"
     ops = { "+": operator.add, "-": operator.sub, "*": operator.mul }
@@ -190,9 +198,11 @@ def solve(params, headers):
     if "X-The-Ultimate-Question" in headers:
         print "Ultimate question"
         result = "42"
-    elif q.find("largest") != -1:
+    elif q.find("is largest") != -1:
         # Which of the numbers is largest: 841, 973, 279, 146, 923
         result = largest_number(q)
+    elif q.find("is second largest") != -1:
+        result = second_largest_number(q)
     elif re.search("How much is [a-z] [\+*/-] [a-z]", q):
         result = arithm_params(q, params, cookies)
     elif re.search("How much is [0-9]+ [\+*/-] [0-9]+", q):
