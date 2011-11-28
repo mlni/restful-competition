@@ -1,4 +1,4 @@
-import sys, cgi, re, operator, random, fractions, time
+import sys, cgi, re, operator, random, fractions, time, base64
 from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 
 REST_STATE = {}
@@ -166,6 +166,12 @@ def referer(h):
     ref = h.get("Referer")
     return ref
 
+def basic_auth(headers):
+    auth = headers["Authorization"]
+    pair = base64.b64decode(auth.split()[1])
+    print "Auth: %s" % pair
+    return pair.split(":")[0]
+
 SESSION_ID = 1
 
 def sid():
@@ -297,6 +303,8 @@ def solve(params, headers):
         result = headers.get("User-Agent")
     elif q.find("Which browser am I using") != -1:
         result = headers.get("User-Agent")
+    elif q.find("What is my username") != -1:
+        result = basic_auth(headers)
     else:
         print "No match!"
         

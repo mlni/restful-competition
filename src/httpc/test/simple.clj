@@ -1,4 +1,5 @@
 (ns httpc.test.simple
+  (:require [clojure.contrib.base64 :as b64])
   (:use httpc.test.common
 	[clojure.contrib.str-utils :only [str-join]]
 	[clojure.contrib.lazy-seqs]
@@ -8,7 +9,7 @@
   (make-test (to-question :params {:q "What is your name?"})
 	     (assert-content (:name (current-player)))))
 
-(defn- create-two-number-aritmetic-test [op & {convert :convert}]
+(defn- create-two-number-aritmetic-test [op & {convert :convert score :score}]
   "Test arithmetic with two random numbers and a random operation (+, - or *)"
   (fn [& args]
     (let [[a b] (random-ints 2 1 (if (< (correct-answers) 5) 20 20000))
@@ -17,7 +18,8 @@
       (simple-question (format "How much is %s %s %s" (converter a)
 			       op-name (converter b))
 		       (converter (op a b))
-		       :penalty -1))))
+		       :penalty -1
+		       :score (or score 1)))))
 
 (defn test-two-numbers-sum [& args]
   ((create-two-number-aritmetic-test +)))
@@ -30,11 +32,11 @@
   (str "0x" (Integer/toHexString i)))
 
 (defn test-two-number-sum-hex [& args]
-  ((create-two-number-aritmetic-test + :convert to-hex)))
+  ((create-two-number-aritmetic-test + :convert to-hex :score 2)))
 (defn test-two-number-mul-hex [& args]
-  ((create-two-number-aritmetic-test * :convert to-hex)))
+  ((create-two-number-aritmetic-test * :convert to-hex :score 2)))
 (defn test-two-number-subtract-hex [& args]
-  ((create-two-number-aritmetic-test - :convert to-hex)))
+  ((create-two-number-aritmetic-test - :convert to-hex :score 2)))
 
 
 (defn test-two-numbers-division [& args]
@@ -67,7 +69,8 @@
 	ans (second (sort ns))
 	fmt (complicate identity (rand-nth [identity to-hex]))]
     (simple-question (str "Which of the numbers is second largest: " (str-join ", " (map fmt ns)))
-		     (fmt ans))))
+		     (fmt ans)
+		     :score 2)))
 
 (defn test-nth-fib [& args]
   (let [n (random-int 10 (complicate 30 300))
@@ -91,7 +94,8 @@
 	r (gcd x y)]
     (simple-question (format "What is the greatest common divisor of %s and %s"
 			     x y)
-		     r)))
+		     r
+		     :score 3)))
 
 (defn test-user-agent [& args]
   (let [uas ["Mozilla/5.0 Chrome/15.0.872.0 Safari/535.2"
@@ -126,3 +130,14 @@
 	       (assert-content result)
 	       :score 5
 	       :penalty -1)))
+
+(defn test-http-authorization [& args]
+  (let [usernames ["sexykitty13" "billg" "mattij" "test" "johndoe2"]
+	passwords ["kalamaja" "kamajahu" "secret" "password" "qwerty"]
+	pick (complicate first rand-nth)
+	[user pass] [(pick usernames) (pick passwords)]
+	user-pass (b64/encode-str (str user ":" pass))]
+    (make-test (to-question :params {:q "What is my username"}
+			    :headers {"Authorization" (str "Basic " user-pass)})
+	       (assert-content user)
+	       :score 5)))

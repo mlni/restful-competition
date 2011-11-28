@@ -129,7 +129,7 @@
 		   :bonus-score bonus-score})))
 
 (defn- maybe-add-bonus-question [test]
-  (if (< (rand) 0.045)
+  (if (< (rand) 0.042)
     (-> test
 	(assoc-in [:request :headers "X-The-Ultimate-Question"]
 		  "What is the answer to Question of Life, the Universe and Everything?")

@@ -99,8 +99,9 @@
 			    test-days-between
 			    test-weekday-of-a-date
 			    test-earliest-date
-			    test-who-is-taller])
-   (make-suite "Dev" [test-second-largest-number])
+			    test-who-is-taller
+			    test-second-largest-number])
+   (make-suite "Dev" [test-http-authorization])
    (make-suite "Rest" [test-restful-resource
 		       test-content-types])))
 
