@@ -47,11 +47,12 @@
 
 (defn test-arithmetic-with-params [& args]
   (let [{:keys [x y a b op result]} (create-arithmetic-testcase [+ - *])
+	fmt (complicate identity (rand-nth [identity to-hex]))
 	params {:q (format "How much is %s %s %s" a op b)
-		a x
-		b y}]
+		a (fmt x)
+		b (fmt y)}]
     (make-test (to-question :params params)
-	       (assert-content result)
+	       (assert-content (fmt result))
 	       :score 4
 	       :penalty -1)))
 
@@ -66,7 +67,7 @@
 
 (defn test-second-largest-number [& args]
   (let [ns (random-ints 5 1 1000)
-	ans (second (sort ns))
+	ans (second (reverse (sort ns)))
 	fmt (complicate identity (rand-nth [identity to-hex]))]
     (simple-question (str "Which of the numbers is second largest: " (str-join ", " (map fmt ns)))
 		     (fmt ans)

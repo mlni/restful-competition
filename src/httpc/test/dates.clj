@@ -51,6 +51,6 @@
   (let [ns (random-ints 5, 100 5000)
 	days (map days-ago ns)
 	fmt (complicate format-ee (rand-nth [format-ee format-us]))]
-    (simple-question (format "Which of the following days is the earliest: %s"
+    (simple-question (format "Which of the following dates is the earliest: %s"
 			     (str-join ", " (map fmt days)))
 		     (fmt (first (sort days))))))

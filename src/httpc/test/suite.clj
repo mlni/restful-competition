@@ -80,30 +80,47 @@
 (defn- init-suites []
   (make-suites
    (make-suite "Warmup" [test-your-name])
-   (make-suite "Arithmetic 1" [test-largest-number
-			       test-two-numbers-sum])
-   (make-suite "Arithmetic 2" [test-two-numbers-multiply
-			       test-two-numbers-subtract
-			       test-two-numbers-division
-			       test-nth-fib
-			       test-arithmetic-with-params])
-   (make-suite "Basic HTTP" [test-user-agent
-			     test-referer
-			     test-cookies])
-   (make-suite "Sessions" [test-my-name-session
-			   test-arithmetic-with-session])
-   (make-suite "New tests" [test-two-number-sum-hex
-			    test-two-number-mul-hex
-			    test-nth-factorial
-			    test-greatest-common-divisors
-			    test-days-between
-			    test-weekday-of-a-date
-			    test-earliest-date
-			    test-who-is-taller
-			    test-second-largest-number])
-   (make-suite "Dev" [test-http-authorization])
+   (make-suite "Set 1 - Arithm 1" [test-largest-number
+				   test-two-numbers-sum])
+   (make-suite "Set 1 - Arithm 2" [test-two-numbers-multiply
+				   test-two-numbers-subtract
+				   test-two-numbers-division
+				   test-nth-fib
+				   test-arithmetic-with-params])
+   (make-suite "Set 1 - Basic HTTP" [test-user-agent
+				     test-referer
+				     test-cookies])
+   (make-suite "Set 1 - Sessions" [test-my-name-session
+				   test-arithmetic-with-session])
    (make-suite "Rest" [test-restful-resource
-		       test-content-types])))
+		       test-content-types])
+
+   (make-suite "Set 2 - Arithm 1" [test-second-largest-number
+				   test-two-number-sum-hex])
+
+   (make-suite "Set 2 - Arithm 2" [test-two-number-mul-hex
+				   test-weekday-of-a-date
+				   test-earliest-date
+				   test-nth-factorial])
+
+   (make-suite "Set 2 - Basic HTTP" [test-referer
+				     test-http-authorization
+				     test-cookies])
+
+   (make-suite "Set 2 - Sessions" [test-arithmetic-with-session
+				   test-who-is-taller])
+   
+   (make-suite "Tartu-test-1" [test-second-largest-number
+			       test-two-number-sum-hex
+			       test-two-number-mul-hex
+			       test-greatest-common-divisors
+			       test-nth-factorial
+			       test-weekday-of-a-date])
+   (make-suite "Tartu-test-2" [test-days-between
+			       test-earliest-date
+			       test-http-authorization
+			       test-who-is-taller])
+   (make-suite "Dev" [test-arithmetic-with-params])))
 
 (defonce *suites* (atom (init-suites)))
 (defonce *suite* (atom (first @*suites*)))

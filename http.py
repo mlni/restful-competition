@@ -86,7 +86,7 @@ def second_largest_number(q):
     nums = {}
     for x in q[q.index(":") + 1:].split(", "):
         nums[int(x, 16)] = x
-    r = sorted(nums.keys())[1]
+    r = sorted(nums.keys())[-2]
     print "second largest: %s - %s" % (nums, nums[r])
     return nums[r]
 
