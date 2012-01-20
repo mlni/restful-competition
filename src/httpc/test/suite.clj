@@ -92,21 +92,16 @@
 				     test-cookies])
    (make-suite "Set 1 - Sessions" [test-my-name-session
 				   test-arithmetic-with-session])
-   (make-suite "Rest" [test-restful-resource
-		       test-content-types])
 
    (make-suite "Set 2 - Arithm 1" [test-second-largest-number
 				   test-two-number-sum-hex])
-
    (make-suite "Set 2 - Arithm 2" [test-two-number-mul-hex
 				   test-weekday-of-a-date
 				   test-earliest-date
 				   test-nth-factorial])
-
    (make-suite "Set 2 - Basic HTTP" [test-referer
 				     test-http-authorization
 				     test-cookies])
-
    (make-suite "Set 2 - Sessions" [test-arithmetic-with-session
 				   test-who-is-taller])
    
@@ -120,7 +115,11 @@
 			       test-earliest-date
 			       test-http-authorization
 			       test-who-is-taller])
-   (make-suite "Dev" [test-arithmetic-with-params])))
+   
+   (make-suite "Rest" [test-restful-resource
+		       test-content-types])
+
+   (make-suite "In development" [test-arithmetic-with-params])))
 
 (defonce *suites* (atom (init-suites)))
 (defonce *suite* (atom (first @*suites*)))
