@@ -63,7 +63,15 @@
 	  (.printStackTrace e)
 	  nil)))))
 
-(def split-by-pred (juxt filter remove))
+
+(defn- split-done [rs]
+  "Split responses by done? predicate into finished and in-progress requests"
+  (loop [finished [] remaining [] rs rs]
+    (if (empty? rs)
+      [finished remaining]
+      (if (c/done? (:response (first rs)))
+	(recur (conj finished (first rs)) remaining (rest rs))
+	(recur finished (conj remaining (first rs)) (rest rs))))))
 
 (defn- test-loop! []
   (with-open [client (c/create-client)]
@@ -73,7 +81,7 @@
 	  start (start-timestamp)]
       (log "Testing" (count tests) (sort (map #(get-in % [:player :name]) tests)))
       (loop [responses responses responded #{}]
-	(let [[finished remaining] (split-by-pred #(c/done? (:response %)) responses)
+	(let [[finished remaining] (split-done responses)
 	      handled (doall
 		       (for [r finished
 			     :when (not (contains? responded r))]
